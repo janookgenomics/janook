@@ -1,0 +1,17 @@
+# Private working notes — never publish
+docs/private/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Build
+target/
+build/
+out/
+*.class
+*.jar
+
+# OS
+.DS_Store
