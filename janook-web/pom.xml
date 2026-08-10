@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.janookgenomics</groupId>
+    <artifactId>janook-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>janook-web</artifactId>
+  <packaging>jar</packaging>
+
+  <name>janook-web</name>
+  <description>
+    Local web UI. janook serve, bound to localhost. Same core, same store. The cloud deployment is
+    this module with Postgres.
+  </description>
+
+  <!--
+    Declared now and empty until phase 4. This is the one module that will eventually carry a
+    framework; it sits beside janook-core and never inside it.
+  -->
+
+  <dependencies>
+    <dependency>
+      <groupId>com.janookgenomics</groupId>
+      <artifactId>janook-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.janookgenomics</groupId>
+      <artifactId>janook-store</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>

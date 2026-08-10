@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.janookgenomics</groupId>
+  <artifactId>janook-parent</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>janook</name>
+  <description>
+    An open-source Java implementation of the Animal Variant Classification Guidelines (AVCG).
+  </description>
+
+  <!--
+    Module order here is documentation, not build order: Maven derives the reactor order from the
+    inter-module dependencies below. Listed core-first because that is the dependency direction.
+  -->
+  <modules>
+    <module>janook-core</module>
+    <module>janook-cli</module>
+    <module>janook-store</module>
+    <module>janook-web</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!--
+      Java 25 is the source, target and release level, not merely the JDK that builds the project.
+      See docs/PLAN.md § Toolchain — this is a settled decision, not a build detail.
+    -->
+    <maven.compiler.release>25</maven.compiler.release>
+
+    <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+    <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+    <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+    <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+    <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!--
+        Sibling module versions are managed here so modules never repeat ${project.version}.
+        Third-party dependencies are added per module. janook-core must acquire none of them
+        at compile scope; the reasoning is in janook-core/pom.xml.
+      -->
+      <dependency>
+        <groupId>com.janookgenomics</groupId>
+        <artifactId>janook-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.janookgenomics</groupId>
+        <artifactId>janook-store</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <!--
+      Every plugin that binds to the default lifecycle is pinned. An unpinned plugin resolves to
+      whatever the local Maven happens to prefer, which makes a clean-clone build unreproducible
+      across machines and across time.
+    -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${maven-clean-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven-resources-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${maven-install-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
