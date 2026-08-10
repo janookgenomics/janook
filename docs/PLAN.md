@@ -39,6 +39,21 @@ tool, not a naming pattern for future ones.
 Pronunciation is **not yet settled** between JA-nook and ja-NOOK. Pick one before the first talk,
 demo or screencast; whichever ships first is the one the field learns.
 
+## Toolchain
+
+| | |
+|---|---|
+| Language level | **Java 25** — the current LTS, supported to 2033 |
+| Build | Maven, multi-module |
+
+Java 25 is the baseline for source, target and release, not just the JDK that happens to build it.
+The LTS cadence is what matters: bioinformatics tools are installed once and left alone for years, so
+the runtime users end up on should be one that is still receiving updates when they get around to
+upgrading.
+
+conda-forge already ships `openjdk` 25, so the Bioconda recipe can declare it today — the
+distribution path in [Distribution](#distribution) is not blocked by the version choice.
+
 ## Architecture
 
 ```
