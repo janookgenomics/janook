@@ -16,6 +16,21 @@
   </description>
 
   <!--
+    Inherited by every module, so each published artifact declares the same licence rather than
+    relying on a file at the root of a repository the artifact does not travel with.
+
+    This covers the Janook source only. Third-party material redistributed in the repository is
+    listed in NOTICE and is not covered — see NOTICE for what and why.
+  -->
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <!--
     Module order here is documentation, not build order: Maven derives the reactor order from the
     inter-module dependencies below. Listed core-first because that is the dependency direction.
   -->
@@ -96,6 +111,35 @@
   </dependencyManagement>
 
   <build>
+    <!--
+      LICENSE and NOTICE travel inside every jar, not just at the root of the repository. A jar
+      pulled from an artifact repository arrives without the repository around it, and Apache-2.0
+      section 4 requires the NOTICE to accompany the distribution.
+
+      The first entry restates the default source directory: declaring <resources> replaces the
+      default rather than adding to it, and omitting it would silently stop packaging every module's
+      own resources.
+    -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <!--
+          A plain relative path, not ${project.parent.basedir}. Resource directories are resolved
+          against the module's own basedir before that property is available, so the property form
+          survives into the effective POM uninterpolated and silently copies nothing. ".." is the
+          repository root for every module here, all of which sit one level down.
+        -->
+        <directory>..</directory>
+        <targetPath>META-INF</targetPath>
+        <includes>
+          <include>LICENSE</include>
+          <include>NOTICE</include>
+        </includes>
+      </resource>
+    </resources>
+
     <!--
       Every plugin that binds to the default lifecycle is pinned. An unpinned plugin resolves to
       whatever the local Maven happens to prefer, which makes a clean-clone build unreproducible
