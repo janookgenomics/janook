@@ -74,6 +74,46 @@ class Avcg2024Test {
         }
     }
 
+    /**
+     * The inventory, spelled out. Written as a literal list rather than derived from the model,
+     * because a test that computes its expectation from the thing under test asserts only that the
+     * code is self-consistent. Adding, removing or renaming a criterion must fail here and be
+     * corrected deliberately — under {@code docs/VERSIONING.md} that is a major version.
+     */
+    private static final List<String> INVENTORY =
+            List.of(
+                    "PVS1", "PS1", "PS2", "PS3", "PS4", "PS5", "PM1", "PM2", "PM3", "PM4", "PP1",
+                    "PP2", "PP3", "PP4", "BS1", "BS2", "BS3", "BP1", "BP2", "BP3", "BP4", "BP5",
+                    "BP6");
+
+    @Test
+    @DisplayName("the inventory is exactly the 23 AVCG criteria, in order")
+    void inventoryIsExactlyTheTwentyThree() {
+        assertEquals(INVENTORY, Avcg2024.all().stream().map(Criterion::code).toList());
+    }
+
+    @Test
+    @DisplayName("fourteen pathogenic, nine benign")
+    void theSplitIsFourteenNine() {
+        assertEquals(
+                14, Avcg2024.all().stream().filter(c -> c.direction() == Direction.PATHOGENIC).count());
+        assertEquals(
+                9, Avcg2024.all().stream().filter(c -> c.direction() == Direction.BENIGN).count());
+    }
+
+    @Test
+    @DisplayName("there is no BS4 and no BP7 — AVCG renumbered rather than leaving gaps")
+    void theRemovedAcmgCodesDoNotExist() {
+        // The codes exist in ACMG/AMP and are the two most likely to be reached for by someone
+        // carrying human guidelines across. AVCG's BS1 is ACMG's BS4; AVCG's BP6 is ACMG's BP7.
+        assertTrue(Avcg2024.byCode("BS4").isEmpty());
+        assertTrue(Avcg2024.byCode("BP7").isEmpty());
+        assertTrue(Avcg2024.byCode("BA1").isEmpty(), "BA1 was removed as an allele-frequency rule");
+        assertTrue(Avcg2024.byCode("PM5").isEmpty(), "ACMG PM5 is AVCG PM2");
+        assertTrue(Avcg2024.byCode("PM6").isEmpty(), "PM6 was removed as unconfirmed de novo");
+        assertTrue(Avcg2024.byCode("PP5").isEmpty(), "PP5 was removed as a reputable-source rule");
+    }
+
     @Test
     @DisplayName("lookup by code round-trips, and an unknown code is empty rather than fatal")
     void lookupByCode() {

@@ -28,8 +28,9 @@ import java.util.Optional;
  * <a href="https://doi.org/10.1038/gim.2015.30">10.1038/gim.2015.30</a> — by comparing the two
  * definitions directly, rather than inferred from the codes.
  *
- * <p><strong>Incomplete.</strong> All fourteen pathogenic criteria are present; the benign side is
- * one of nine.
+ * <p>All twenty-three: fourteen pathogenic, nine benign. There is no {@code BS4} and no
+ * {@code BP7} — AVCG renumbered to close the gaps left by the seven ACMG/AMP criteria it removed,
+ * rather than leaving holes in the sequence.
  */
 public final class Avcg2024 {
 
@@ -242,6 +243,114 @@ public final class Avcg2024 {
                     TABLE,
                     new AcmgOrigin.Retained("PP4"));
 
+    /**
+     * ACMG's {@code BS4}, renumbered because ACMG's own {@code BS1} — allele frequency greater than
+     * expected for the disorder — was removed. Both benign frequency criteria went: breed
+     * structure, founder effects and popular sires make animal allele frequencies mean something
+     * different, and the population databases the human criteria assumed largely do not exist.
+     */
+    public static final Criterion BS1 =
+            new Criterion(
+                    "BS1",
+                    Direction.BENIGN,
+                    Weight.STRONG,
+                    """
+                    Lack of segregation in affected members of a family.""",
+                    TABLE,
+                    new AcmgOrigin.Renumbered(
+                            "BS4",
+                            "renumbered when ACMG/AMP BS1 and BA1, both allele-frequency criteria,"
+                                    + " were removed"));
+
+    public static final Criterion BS2 =
+            new Criterion(
+                    "BS2",
+                    Direction.BENIGN,
+                    Weight.STRONG,
+                    """
+                    Observed in a healthy adult individual for a recessive (homozygous), dominant \
+                    (heterozygous), or X-linked (hemizygous) disorder, with full penetrance \
+                    expected at an early age.""",
+                    TABLE,
+                    new AcmgOrigin.Retained("BS2"));
+
+    public static final Criterion BS3 =
+            new Criterion(
+                    "BS3",
+                    Direction.BENIGN,
+                    Weight.STRONG,
+                    """
+                    Well-established in vitro or in vivo functional studies show no damaging effect \
+                    on protein function or splicing.""",
+                    TABLE,
+                    new AcmgOrigin.Retained("BS3"));
+
+    /**
+     * New in AVCG, and the second of the two additions. The benign counterpart of {@link #PP1} —
+     * and the reason AVCG's {@code BP1} must never be read as ACMG's, which was a missense
+     * criterion removed for being too restrictive without evidence.
+     */
+    public static final Criterion BP1 =
+            new Criterion(
+                    "BP1",
+                    Direction.BENIGN,
+                    Weight.SUPPORTIVE,
+                    """
+                    Cross-species alignment shows the variant is not conserved and other \
+                    information across species (e.g., ClinVar data) states the variant is benign.""",
+                    TABLE,
+                    new AcmgOrigin.NewInAvcg(
+                            "integrates conservation and clinical data from other species; ACMG/AMP"
+                                    + " BP1 was a different criterion and was removed"));
+
+    public static final Criterion BP2 =
+            new Criterion(
+                    "BP2",
+                    Direction.BENIGN,
+                    Weight.SUPPORTIVE,
+                    """
+                    Observed in trans with a pathogenic variant for a fully penetrant dominant \
+                    gene/disorder or observed in cis with a pathogenic variant in any inheritance \
+                    pattern.""",
+                    TABLE,
+                    new AcmgOrigin.Retained("BP2"));
+
+    public static final Criterion BP3 =
+            new Criterion(
+                    "BP3",
+                    Direction.BENIGN,
+                    Weight.SUPPORTIVE,
+                    """
+                    In-frame deletions/insertions in a repetitive region without a known \
+                    function.""",
+                    TABLE,
+                    new AcmgOrigin.Retained("BP3"));
+
+    /** The benign mirror of {@link #PP3}'s tightening: all the evidence, not multiple lines of it. */
+    public static final Criterion BP4 =
+            new Criterion(
+                    "BP4",
+                    Direction.BENIGN,
+                    Weight.SUPPORTIVE,
+                    """
+                    All computational evidence supports a benign effect on the gene or gene product \
+                    (conservation, evolutionary, splicing impact, etc.).""",
+                    TABLE,
+                    new AcmgOrigin.Amended(
+                            "BP4",
+                            "requires all computational evidence to agree, where ACMG/AMP required"
+                                    + " multiple lines of it suggesting no impact"));
+
+    public static final Criterion BP5 =
+            new Criterion(
+                    "BP5",
+                    Direction.BENIGN,
+                    Weight.SUPPORTIVE,
+                    """
+                    Variant found in a case with an alternate molecular basis for disease.""",
+                    TABLE,
+                    new AcmgOrigin.Retained("BP5"));
+
     /** ACMG's {@code BP7}, renumbered when ACMG's own {@code BP6} was removed. */
     public static final Criterion BP6 =
             new Criterion(
@@ -267,7 +376,7 @@ public final class Avcg2024 {
     private static final List<Criterion> ALL =
             List.of(
                     PVS1, PS1, PS2, PS3, PS4, PS5, PM1, PM2, PM3, PM4, PP1, PP2, PP3, PP4,
-                    BP6);
+                    BS1, BS2, BS3, BP1, BP2, BP3, BP4, BP5, BP6);
 
     private static final Map<String, Criterion> BY_CODE = indexByCode(ALL);
 
