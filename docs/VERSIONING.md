@@ -46,9 +46,14 @@ an altered answer without an explicit decision to upgrade.
 The patch line is a real test, not a formality: if you cannot argue that no classification anywhere
 changes, it is not a patch.
 
-Before `1.0.0` the interfaces are unstable and breaking changes ride in on a minor bump, as is
-conventional for `0.x`. The weight rule is the exception — it binds from the first release that
-classifies anything a user keeps.
+**The first release is `9.0.0`.** Semantic versioning fixes the *meaning* of a bump, not the number
+a project starts from, and Janook starts at nine by choice. Nothing downstream cares: Maven, Bioconda
+and conda-forge require only that versions never move backwards.
+
+There is therefore no `0.x` phase and no period during which breaking changes ride in on a minor
+bump. The rules in the table above apply from the first release onwards, without exception — so early
+work that breaks the input format goes to `10.0.0` rather than hiding behind a leading zero. Version
+numbers are free; a number that means what it says is not.
 
 ## The guideline edition
 
@@ -96,14 +101,14 @@ revision cadence of its own, which is precisely why Janook needs one.
 Three facts:
 
 ```
-janook 0.1.0
+janook 9.0.0
 AVCG-2024 (https://doi.org/10.3389/fvets.2024.1497817)
 build 1a2b3c4
 ```
 
 The tool version and the guideline edition are the two above. The **build commit** is the third,
-and it is what turns a version number into an exact state of the source — a released `0.1.0` and a
-locally built `0.1.0-SNAPSHOT` are not the same software, and the commit says which one produced a
+and it is what turns a version number into an exact state of the source — a released `9.0.0` and a
+locally built `9.0.0-SNAPSHOT` are not the same software, and the commit says which one produced a
 given result.
 
 A build made from a dirty working tree is marked as such:
@@ -125,8 +130,8 @@ then attached to a paper is unreproducible, and nobody finds out for two years.
 | `release/X.Y.Z`, `hotfix/X.Y.Z` | `X.Y.Z` — no suffix |
 | `main` | `X.Y.Z` — no suffix, equal to the tag without its `v` |
 
-A release tag is the tool version prefixed with `v`: `v1.2.0`. It points at a commit on `main`, and
-the artifact built from that commit reports exactly `1.2.0`.
+A release tag is the tool version prefixed with `v`: `v9.1.0`. It points at a commit on `main`, and
+the artifact built from that commit reports exactly `9.1.0`.
 
 The version bump happens **on the `release/` branch, before the merge to `main`**, so that the tagged
 commit and the artifact agree by construction rather than by care. A release runs:

@@ -27,7 +27,7 @@ body:
     attributes:
       label: Janook version
       description: Output of `janook --version`. Criterion weights and the decision tree can change between major versions.
-      placeholder: e.g. 0.1.0
+      placeholder: e.g. 9.0.0
     validations:
       required: true
 
