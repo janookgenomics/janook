@@ -1,7 +1,7 @@
 # Versioning
 
-*`janook --version` reports what this page describes. The release check at the bottom is the one
-part not built yet; the rules it will enforce are settled.*
+*Everything on this page is implemented. `janook --version` reports the three facts below, and
+`scripts/check-release-version.sh` enforces the release rules on every push.*
 
 ## Two versions, not one
 
@@ -166,3 +166,29 @@ release then silently reverts whatever the last one fixed. CI checks it rather t
 
 A tag whose name disagrees with the artifact built from its commit is a failed release, not a
 labelling detail. The release check fails on that mismatch rather than letting it publish.
+
+## The release check
+
+`scripts/check-release-version.sh` enforces the table above. It runs on every push, not only at a
+release, so a version bumped on the wrong branch fails within minutes instead of at the tag — when
+the mistake is one commit old rather than buried under a merge.
+
+**It reads the version out of the built jar, not out of the pom.** The pom says what the build was
+asked to produce; the jar says what it produced, and a filtering fault or a stale `target` sits
+exactly in that gap. The jar is also the thing that gets attached to a paper.
+
+| Where the commit is | What must hold |
+|---|---|
+| `develop`, `feature/<name>` | carries `-SNAPSHOT` |
+| `release/X.Y.Z`, `hotfix/X.Y.Z` | exactly `X.Y.Z`, no suffix |
+| `main` | no `-SNAPSHOT`, built from a known commit and a clean tree |
+| tag `vX.Y.Z` | exactly `X.Y.Z`, built from a known commit and a clean tree |
+| anything else | skipped, and says so |
+
+That last row is deliberate. A check that invents a rule for a context it does not understand
+teaches people to work around it, so an unrecognised ref is reported as skipped rather than guessed
+at.
+
+This is also where "a dirty build is not presentable as a released version" stops being a sentence
+and starts being enforced: on `main` and on a tag, `build unknown` or a `-dirty` marker fails.
+Elsewhere both are allowed, because unreleasable work is allowed to be untidy.

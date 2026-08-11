@@ -56,3 +56,20 @@ jobs:
 
       - name: Species scan self-test
         run: ./scripts/check-core-species-free.test.sh
+
+      - name: Release-version check
+        # After the build, because it reads the version out of the jar rather than the pom: the
+        # pom says what the build was asked to produce, the jar says what it produced.
+        #
+        # The ref reaches the script through the environment, never through ${{ }} inside the
+        # shell — same rule as branch-policy.yml, and for the same reason.
+        #
+        # head_ref on a pull request, where github.ref is a merge ref no rule applies to. Without
+        # it every pull request would take the skip path and the check would look like it was
+        # running while asserting nothing.
+        env:
+          REF: ${{ github.head_ref || github.ref }}
+        run: ./scripts/check-release-version.sh "$REF"
+
+      - name: Release-version self-test
+        run: ./scripts/check-release-version.test.sh
