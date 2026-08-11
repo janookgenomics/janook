@@ -53,6 +53,23 @@ So the encoded criteria are published in full, generated from the code that actu
 **[docs/criteria/AVCG-2024.md](docs/criteria/AVCG-2024.md)**. Every row names the table and page it
 came from, so any single claim can be checked against the paper in about a minute.
 
+The tool will tell you the same thing directly, out of the model it classifies with:
+
+```
+$ janook explain PS5
+PS5  pathogenic  strong
+
+  Cosegregation with disease in multiple affected family members in a gene
+  definitively known to cause the disease.
+
+  Origin  was ACMG/AMP PP1 — reweighted from supporting to strong
+          (our annotation, not from either paper)
+  Source  Table 4, p. 8 · AVCG-2024 · https://doi.org/10.3389/fvets.2024.1497817
+```
+
+`janook explain --list` prints all 23. If you reach for a code from the human guidelines, it will
+tell you what AVCG calls it — `BP7` here is `BP6`, and ACMG's `PP1` is `PS5`.
+
 If you find a discrepancy, please open an issue. It is a **correctness bug**, not a documentation
 one: under [docs/VERSIONING.md](docs/VERSIONING.md), changing a criterion's weight is a major
 version, because it can change a classification someone has already published.
