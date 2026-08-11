@@ -1,0 +1,55 @@
+# The same build as ci.yml, with no dependency cache.
+#
+# WHY THIS EXISTS. A cache can hide a missing declaration: an artifact that resolves only because a
+# previous run happened to leave it behind. Every push then passes, and the first person to clone
+# the repository loses an evening to a failure nobody else can reproduce. That is the specific
+# report this run is meant to prevent.
+#
+# Weekly rather than per-push because it is slower and the failure it catches appears when a
+# dependency changes, not when a line of code does.
+
+name: CI (uncached)
+
+on:
+  schedule:
+    # Mondays, 06:00 UTC — a failure is waiting at the start of the week rather than discovered
+    # mid-release.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: verify from an empty repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+          # No `cache:` key here. That omission is the entire point of this workflow — resist the
+          # temptation to add it when this run is slow.
+
+      - name: Public-safety check
+        run: ./scripts/check-public-safe.sh
+
+      - name: Public-safety self-test
+        # The check itself has a test suite asserting each of its rules fails when violated. A
+        # scan that is quietly misconfigured passes every run until the day it was needed.
+        run: ./scripts/check-public-safe.test.sh
+
+      - name: Build with an empty local repository
+        # Explicitly relocating the local repository, rather than trusting the runner to be clean,
+        # so this stays true even if a future cache or a pre-warmed image appears.
+        run: mvn clean verify -Dmaven.repo.local="${RUNNER_TEMP}/empty-m2"
+
+      - name: Species scan self-test
+        run: ./scripts/check-core-species-free.test.sh
