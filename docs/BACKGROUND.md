@@ -210,6 +210,10 @@ Aim at researchers, not clinics.
 
 - AVCG guidelines — https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2024.1497817/full
 - AVCG reproducibility (preprint) — https://www.biorxiv.org/content/10.1101/2025.11.12.687631v1.full
+- ACMG/AMP 2015 guidelines, the human standard AVCG was derived from — Richards et al.,
+  *Genetics in Medicine* 17:405–424, https://doi.org/10.1038/gim.2015.30. Needed to check what each
+  AVCG criterion *was*, since AVCG renumbered and a shared code is not a shared criterion. Not
+  redistributable here — unlike the AVCG paper it is not CC BY, so it is cited, not shipped.
 - OMIA — https://www.omia.org/home/
 - InterVar — https://github.com/WGLab/InterVar
 - ACMG tool benchmark 2026 — https://pmc.ncbi.nlm.nih.gov/articles/PMC12916173/
