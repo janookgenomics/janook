@@ -25,10 +25,91 @@
     what makes janook-core embeddable in someone else's pipeline without dragging in a persistence
     layer, a web server or a CLI framework.
 
-    The pressure arrives with the criterion definitions, which have to be read from somewhere. Both
-    acceptable resolutions keep this file empty of third-party compile dependencies — parse in
-    janook-cli and hand core a built object, or generate core's criterion table at build time. A
-    later change turns this comment into something the build enforces.
+    It is no longer only a comment. The enforcer executions declared below fail the build at the
+    validate phase if a dependency appears here, and the tripwire projects under src/it prove those
+    rules actually fire.
+
+    Test-scope dependencies are deliberately exempt: the boundary is about what an embedder is
+    forced to accept, and nobody inherits your test classpath.
   -->
+
+  <dependencies>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!--
+        Declared with no configuration: the rules and their messages live in the parent, so that
+        the tripwire projects inherit exactly what runs here.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+
+      <!-- Species token scan over src/main/java. Also configured in the parent. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+      </plugin>
+
+      <!--
+        The tripwires. Each project under src/it violates exactly one boundary rule and is asserted
+        to fail, because an enforcement rule that is silently misconfigured passes every build
+        forever and is discovered on the day it was needed.
+
+        Each project's verify.groovy also asserts the build log explains *which* rule broke and
+        *why* it exists — a rule that fails with "banned dependency found" teaches nobody anything.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <configuration>
+          <projectsDirectory>src/it</projectsDirectory>
+          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+          <localRepositoryPath>${project.build.directory}/it-repo</localRepositoryPath>
+          <showErrors>true</showErrors>
+          <streamLogs>false</streamLogs>
+          <properties>
+            <!--
+              Reach the real scan script from a project built in a temporary directory. Resolved
+              here, in janook-core's context, where project.parent.basedir is the repository root —
+              the tripwire project itself cannot work it out, since it inherits janook-parent from
+              a repository rather than from disk.
+            -->
+            <janook.species.scan.script>${project.parent.basedir}/scripts/check-core-species-free.sh</janook.species.scan.script>
+          </properties>
+        </configuration>
+        <dependencies>
+          <!-- Required for the verify.groovy log assertions. -->
+          <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>5.0.6</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>boundary-tripwires</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>install</goal>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
