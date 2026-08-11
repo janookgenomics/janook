@@ -18,6 +18,13 @@ and a future AVCG revision can change a weight with no Janook code change at all
 classification that names only one of them cannot be reproduced: years later nobody can tell whether
 a differing answer came from a changed tool or a changed rulebook.
 
+The working group says the same thing, and asks for a third field Janook does not record yet. Its
+2026 reproducibility study closes its recommendations with: *"As guidelines can change and new
+information can be published, the classification of a variant should be accompanied by the date of
+classification, the version of the guidelines used and references used during the classification."*
+The guideline edition is settled here; the **date** and the **references used** belong to the record
+format rather than to this page, and are noted here so they are not lost.
+
 ## The tool version
 
 Semantic versioning — `MAJOR.MINOR.PATCH` — with one rule stricter than semver requires:
@@ -45,9 +52,10 @@ classifies anything a user keeps.
 
 ## The guideline edition
 
-AVCG has no version number of its own. It is a 2024 publication, and the authors say plainly that the
-guidelines are subject to change and expect revisions. So Janook names the edition itself and pins
-the name to something immutable:
+AVCG has no version number of its own. It is a 2024 publication, and the authors are explicit that
+the guidelines *"are not final (and are not expected ever to become final); they should be
+continually reviewed and refined."* So Janook names the edition itself and pins the name to something
+immutable:
 
 | | |
 |---|---|
