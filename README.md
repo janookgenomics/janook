@@ -2,6 +2,11 @@
 
 An open-source implementation of the **Animal Variant Classification Guidelines** (AVCG).
 
+> **Janook is the tool. AVCG is the standard.** AVCG is the published 2024 guideline for deciding
+> whether a genetic variant in an animal causes disease; Janook is software that applies it. The two
+> are kept distinct throughout — AVCG is what the field cites and searches for, Janook is what you
+> install and run.
+
 When someone finds a genetic variant in a dog, horse, cat or cow, the question is always the same:
 does it cause disease, or is it harmless? In 2024 a published rulebook answered *how to decide* — 23
 weighted pieces of evidence feeding a decision tree that produces one of five labels: pathogenic,
@@ -34,6 +39,16 @@ Pre-code. Reading and design.
 |---|---|
 | [docs/BACKGROUND.md](docs/BACKGROUND.md) | What AVCG is, prior art, who would use it |
 | [docs/PLAN.md](docs/PLAN.md) | What gets built, in what order, and the decisions behind it |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to build it, how to test it, how to open a pull request |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Expected conduct, and where to report a problem |
+
+## Licence
+
+[Apache License 2.0](LICENSE) — permissive, with an explicit patent grant.
+
+Third-party material redistributed here is **not** covered by that licence. It is listed in
+[NOTICE](NOTICE) with its own terms and attribution — currently the AVCG paper itself, included under
+CC BY 4.0 so a reader checking whether the implementation is faithful has the specification to hand.
 
 ## Decisions so far
 
