@@ -1,8 +1,5 @@
 package com.janookgenomics.janook.cli;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.Properties;
 
 /**
@@ -12,42 +9,33 @@ import java.util.Properties;
  * number lives. A constant here would be a second source of truth, and the two would disagree on
  * the day a release forgets one of them — which is exactly the failure the release check exists to
  * catch.
- *
- * <p>Reading a classpath resource is I/O, which is why this sits in the CLI rather than in the
- * core.
  */
 final class ToolVersion {
 
-    private static final String RESOURCE = "/janook-version.properties";
     private static final String KEY = "tool.version";
 
+    static String read() {
+        return from(BuildProperties.load());
+    }
+
     /**
-     * @throws IllegalStateException if the resource is missing or was packaged without filtering,
+     * @throws IllegalStateException if the version is absent or was packaged without filtering,
      *     both of which are build faults rather than anything a user can act on
      */
-    static String read() {
-        Properties properties = new Properties();
-        try (InputStream in = ToolVersion.class.getResourceAsStream(RESOURCE)) {
-            if (in == null) {
-                throw new IllegalStateException(
-                        RESOURCE + " is missing from the jar. The build did not package it.");
-            }
-            properties.load(in);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Could not read " + RESOURCE, e);
-        }
-
+    static String from(Properties properties) {
         String version = properties.getProperty(KEY);
         if (version == null || version.isBlank()) {
-            throw new IllegalStateException(RESOURCE + " has no " + KEY + " entry.");
+            throw new IllegalStateException(
+                    BuildProperties.describeSource() + " has no " + KEY + " entry.");
         }
 
-        // An unfiltered resource yields the literal placeholder. Failing here beats printing
-        // "janook ${project.version}" to somebody recording which version produced a result.
-        if (version.startsWith("${")) {
+        // Unlike the build commit, an unfiltered version has no sensible fallback: the tool would
+        // be claiming to be a release it cannot name. Fail rather than print "${project.version}"
+        // to somebody recording which version produced a result.
+        if (BuildProperties.isUnresolved(version)) {
             throw new IllegalStateException(
                     "Resource filtering is not enabled for "
-                            + RESOURCE
+                            + BuildProperties.describeSource()
                             + ": it still contains "
                             + version);
         }
