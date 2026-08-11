@@ -34,13 +34,14 @@ public final class Janook {
     }
 
     /**
-     * Prints the tool version and the guideline edition. The build commit — the third fact that
-     * turns a version into an exact state of the source — arrives with the build stamp.
+     * Prints the three facts a stored classification needs: which software, which rulebook, and
+     * which exact state of the source.
      */
     private static void printVersion(PrintStream out) {
         GuidelineEdition edition = GuidelineEdition.current();
         out.println("janook " + ToolVersion.read());
         out.println(edition.identifier() + " (" + edition.doiUrl() + ")");
+        out.println("build " + BuildStamp.read().describe());
     }
 
     private Janook() {}

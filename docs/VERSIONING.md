@@ -1,7 +1,7 @@
 # Versioning
 
-*This page is the specification the CLI and the release tooling are built to. The `janook --version`
-output and the release check described below are being implemented; the rules are settled.*
+*`janook --version` reports what this page describes. The release check at the bottom is the one
+part not built yet; the rules it will enforce are settled.*
 
 ## Two versions, not one
 
@@ -119,6 +119,25 @@ build 1a2b3c4-dirty
 
 A dirty build is **not presentable as a released version**. A jar built from uncommitted work and
 then attached to a paper is unreproducible, and nobody finds out for two years.
+
+A build with no git history behind it reports the commit as unknown:
+
+```
+build unknown
+```
+
+That happens whenever the source did not arrive as a clone — a release tarball, a source zip, a
+Docker context that excluded `.git`. **Bioconda builds from a tarball**, so this is the ordinary
+case for the path most users install through, not an edge case. Failing those builds would make the
+tool unbuildable on its main distribution route in order to police a rule that only bites at
+release time, so the build degrades and the **release check** refuses instead: no commit, or a
+dirty tree, means no release.
+
+The line is printed rather than omitted. A missing line reads as "clean" to anyone skimming;
+`unknown` does not.
+
+What this leaves owed: a release tarball should carry its own commit, stamped in when the tarball is
+built, so that a Bioconda-installed jar can still name its source. That belongs to distribution.
 
 ## Maven versions and gitflow
 

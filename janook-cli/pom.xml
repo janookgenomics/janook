@@ -26,6 +26,19 @@
     runner here — the earliest a framework appears is janook-web in phase 4.
   -->
 
+  <!--
+    Fallbacks for the git properties, used verbatim when the build has no git history to read —
+    a release tarball, a source zip, a Docker context that excludes .git. The plugin below
+    overwrites both when a repository is present.
+
+    Without these, filtering would leave the literal ${git.commit.id.abbrev} in the packaged
+    resource and the command would print it at somebody recording provenance.
+  -->
+  <properties>
+    <git.commit.id.abbrev>unknown</git.commit.id.abbrev>
+    <git.dirty>false</git.dirty>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.janookgenomics</groupId>
@@ -75,6 +88,75 @@
     </resources>
 
     <plugins>
+      <!--
+        Reads the commit and the dirty flag out of git, into project properties that resource
+        filtering then writes into janook-version.properties.
+
+        Bound to initialize: the properties must exist before process-resources, or filtering
+        silently emits the fallbacks above and every jar claims an unknown commit.
+
+        failOnNoGitDirectory is false on purpose. Bioconda builds from a release tarball, which has
+        no .git, and so do source zips and Docker contexts that exclude it — failing those builds
+        would make the tool unbuildable on its main distribution path to police a rule that only
+        matters at release time. The release check enforces it where it belongs: no commit, or a
+        dirty tree, means no release. See docs/VERSIONING.md.
+      -->
+      <plugin>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>capture-build-commit</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <!--
+            Shell out to git rather than use the plugin's bundled JGit.
+
+            JGit measures the filesystem's timestamp resolution by writing .git/.probe-<uuid>,
+            reading it back and deleting it. On macOS it intermittently loses that race and prints
+            a FileNotFoundException stack trace *after* BUILD SUCCESS — and because it caches the
+            measurement in ~/.config/jgit/config, a machine without that file re-measures on every
+            build and sees it again and again. A stack trace after a successful build teaches
+            people to skim past ERROR lines, which is a worse defect than the one it reports.
+
+            It also makes the dirty flag mean exactly what git status means, rather than JGit's
+            approximation of it — this project marks releases on that flag, so the two agreeing
+            matters.
+
+            Three environments, all three verified rather than assumed:
+
+              .git present, git works    -> the commit, plus -dirty when the tree is not clean
+              no .git at all             -> the fallbacks above, reported as "build unknown"
+              .git present, git broken   -> THE BUILD FAILS
+
+            The last one is the price of this setting, and it is deliberate.
+            failOnUnableToExtractRepoInfo does not cover it — a git command that exits non-zero
+            aborts the build regardless. That is acceptable because it cannot touch the path
+            packagers use: a release tarball has no .git, so it takes the second row. Reaching the
+            third means a repository present with a broken git alongside it, which is a broken
+            environment reporting itself with an actionable message rather than a tool guessing.
+          -->
+          <useNativeGit>true</useNativeGit>
+          <!-- The repository root: this module sits one level below it. -->
+          <dotGitDirectory>${project.parent.basedir}/.git</dotGitDirectory>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
+          <!-- Filtering consumes the properties directly; a second generated file would be a
+               second source of truth. -->
+          <generateGitPropertiesFile>false</generateGitPropertiesFile>
+          <abbrevLength>7</abbrevLength>
+          <includeOnlyProperties>
+            <includeOnlyProperty>^git.commit.id.abbrev$</includeOnlyProperty>
+            <includeOnlyProperty>^git.dirty$</includeOnlyProperty>
+          </includeOnlyProperties>
+        </configuration>
+      </plugin>
+
       <!--
         The main class, so the jar is runnable as java -jar rather than only from a classpath the
         user has to assemble. A launcher will wrap this later; the manifest is what it wraps.
