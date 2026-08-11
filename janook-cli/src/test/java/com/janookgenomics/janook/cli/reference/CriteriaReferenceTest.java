@@ -93,5 +93,10 @@ class CriteriaReferenceTest {
         assertTrue(rendered.contains("transcribed by hand"));
         assertTrue(rendered.contains("open an issue"));
         assertTrue(rendered.contains("correctness bug"));
+
+        // The definitions are the guideline's words; the ACMG comparison is ours. Presenting them
+        // in adjacent columns without saying so invites a reader to attribute our annotation to
+        // the paper.
+        assertTrue(rendered.contains("origin column is ours"));
     }
 }

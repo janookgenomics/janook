@@ -23,6 +23,11 @@ import java.util.Optional;
  * edited to mean something else, because classifications already recorded under {@code AVCG-2024}
  * have to keep meaning what they meant.
  *
+ * <p>The {@link AcmgOrigin} on each criterion is <em>our</em> annotation, not either paper's. Each
+ * one is checked against the 2015 ACMG/AMP guidelines — Richards et al.,
+ * <a href="https://doi.org/10.1038/gim.2015.30">10.1038/gim.2015.30</a> — by comparing the two
+ * definitions directly, rather than inferred from the codes.
+ *
  * <p><strong>Incomplete.</strong> Four of twenty-three, seeded to prove the shape carries every
  * kind of provenance. The rest follow.
  */
