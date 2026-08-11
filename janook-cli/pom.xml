@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.janookgenomics</groupId>
+    <artifactId>janook-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>janook-cli</artifactId>
+  <packaging>jar</packaging>
+
+  <name>janook-cli</name>
+  <description>
+    The janook command. Wraps janook-core and owns everything core refuses to do: reading YAML and
+    TSV input, loading species profiles, formatting reports, exit codes. Fully offline.
+  </description>
+
+  <!--
+    A plain jar with a main, run as java -jar janook-cli/target/janook-cli-<version>.jar.
+    A launcher will wrap that later so users never type it. There is deliberately no framework
+    runner here — the earliest a framework appears is janook-web in phase 4.
+  -->
+
+  <dependencies>
+    <dependency>
+      <groupId>com.janookgenomics</groupId>
+      <artifactId>janook-core</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>
