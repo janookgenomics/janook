@@ -70,6 +70,10 @@ PS5  pathogenic  strong
 `janook explain --list` prints all 23. If you reach for a code from the human guidelines, it will
 tell you what AVCG calls it — `BP7` here is `BP6`, and ACMG's `PP1` is `PS5`.
 
+> **There is no installable `janook` yet.** The examples above are written as the command will be
+> once packaging exists. From a clone, `mvn clean package` and then `./scripts/janook explain PS5`,
+> which runs the jar you just built.
+
 If you find a discrepancy, please open an issue. It is a **correctness bug**, not a documentation
 one: under [docs/VERSIONING.md](docs/VERSIONING.md), changing a criterion's weight is a major
 version, because it can change a classification someone has already published.
