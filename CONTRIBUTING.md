@@ -82,6 +82,11 @@ The project follows gitflow.
 
 Branch names are public. Keep internal identifiers out of them, and out of pull request titles.
 
+Which version number a branch declares, and when it changes, is not a matter of taste here — see
+[docs/VERSIONING.md](docs/VERSIONING.md). The short form: work in progress carries `-SNAPSHOT`, a
+release drops it on the `release/` branch before the merge to `main`, and any change to a criterion
+weight or the decision tree is a major version.
+
 ## Before you open a pull request
 
 1. `mvn clean verify` passes from a clean clone

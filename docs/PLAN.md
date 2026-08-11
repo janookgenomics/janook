@@ -270,7 +270,9 @@ citation.
 - **BioContainer** — auto-generated from the Bioconda recipe. Docker and Singularity, free.
 - **GitHub release** — plain jar.
 
-Requires an open license, which is the plan anyway.
+All three require an open licence. That is settled: Apache-2.0, in [LICENSE](../LICENSE). What each
+release is called, and how a tag, a Maven version and a jar are kept in agreement, is in
+[VERSIONING.md](VERSIONING.md).
 
 ## Out of scope
 

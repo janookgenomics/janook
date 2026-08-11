@@ -1,0 +1,149 @@
+# Versioning
+
+*This page is the specification the CLI and the release tooling are built to. The `janook --version`
+output and the release check described below are being implemented; the rules are settled.*
+
+## Two versions, not one
+
+Every classification Janook produces records **two** versions, and conflating them makes
+years-later reproduction impossible.
+
+| | |
+|---|---|
+| **Tool version** | Janook's own version — the software |
+| **Guideline edition** | which edition of AVCG the classification was made under — the rulebook |
+
+They move independently. Janook 1.4.0 can fix a report-formatting bug without touching a criterion,
+and a future AVCG revision can change a weight with no Janook code change at all. A stored
+classification that names only one of them cannot be reproduced: years later nobody can tell whether
+a differing answer came from a changed tool or a changed rulebook.
+
+The working group says the same thing, and asks for a third field Janook does not record yet. Its
+2026 reproducibility study closes its recommendations with: *"As guidelines can change and new
+information can be published, the classification of a variant should be accompanied by the date of
+classification, the version of the guidelines used and references used during the classification."*
+The guideline edition is settled here; the **date** and the **references used** belong to the record
+format rather than to this page, and are noted here so they are not lost.
+
+## The tool version
+
+Semantic versioning — `MAJOR.MINOR.PATCH` — with one rule stricter than semver requires:
+
+> **Any change to a criterion's weight or to the decision tree is a MAJOR version.** Even when no
+> interface changes. Even when it is a one-line correction of a transcription error.
+
+The worst failure this tool can have is quietly returning a different classification than it returned
+last year. A patch release is the kind of thing people apply without reading the notes, so a weight
+change must not be able to arrive in one. Making it major means a lab pinned to `1.x` never receives
+an altered answer without an explicit decision to upgrade.
+
+| Bump | What it covers |
+|---|---|
+| **MAJOR** | any criterion weight or decision-tree change; incompatible change to the input format, the output format, the CLI surface or the embedding API |
+| **MINOR** | new capability, backwards compatible — a new species profile, a new output format, a new subcommand |
+| **PATCH** | fixes that cannot change any classification |
+
+The patch line is a real test, not a formality: if you cannot argue that no classification anywhere
+changes, it is not a patch.
+
+**The first release is `9.0.0`.** Semantic versioning fixes the *meaning* of a bump, not the number
+a project starts from, and Janook starts at nine by choice. Nothing downstream cares: Maven, Bioconda
+and conda-forge require only that versions never move backwards.
+
+There is therefore no `0.x` phase and no period during which breaking changes ride in on a minor
+bump. The rules in the table above apply from the first release onwards, without exception — so early
+work that breaks the input format goes to `10.0.0` rather than hiding behind a leading zero. Version
+numbers are free; a number that means what it says is not.
+
+## The guideline edition
+
+AVCG has no version number of its own. It is a 2024 publication, and the authors are explicit that
+the guidelines *"are not final (and are not expected ever to become final); they should be
+continually reviewed and refined."* So Janook names the edition itself and pins the name to something
+immutable:
+
+| | |
+|---|---|
+| Identifier | **`AVCG-2024`** |
+| Pinned to | https://doi.org/10.3389/fvets.2024.1497817 |
+
+**Display the DOI as the full `https://doi.org/…` URL, never the `doi:` prefix form.** That is
+Crossref's current display guidance, and the URL resolves for anyone who pastes it — which is the
+point of citing a DOI rather than a journal page.
+
+**The identifier is a name Janook gives a DOI — not a value derived from a publication year.** The
+year is there because it is what the field says out loud, but the DOI is the part that is actually
+immutable. The mapping from identifier to DOI is a table this project maintains; it is never a string
+computed from a date.
+
+Two rules follow, both cheap to state now and awkward to retrofit once results are stored:
+
+- **A second full edition in the same calendar year takes a suffix** — `AVCG-2024.2`. Consensus
+  guidelines of this kind are revised on multi-year cycles, so this is unlikely; the point is that
+  the identifier must not be *capable* of colliding.
+- **An amendment carrying its own DOI gets its own identifier.** This is the likelier event by some
+  margin. A rulebook of this kind changes by correction, erratum or criterion-specific specification
+  far more often than by republication, and the danger is not two editions in one year — it is the
+  criteria shifting with no new citation to point at. Where the change has a DOI, Janook names it.
+  Where it has none, there is nothing to pin, and that gets recorded as an open question rather than
+  absorbed quietly into `AVCG-2024`.
+
+Nothing is ever renamed retrospectively: `AVCG-2024` keeps meaning exactly what it means today. That
+is the reason for naming an edition instead of tracking "latest" — a classification made under one
+edition stays interpretable after the next one lands.
+
+The guidelines are maintained by ISAG's **Variant Pathogenicity Working Group**, under its Animal
+Genetic Testing Standardization committee. The working group has published no version scheme or
+revision cadence of its own, which is precisely why Janook needs one.
+
+## What `janook --version` reports
+
+Three facts:
+
+```
+janook 9.0.0
+AVCG-2024 (https://doi.org/10.3389/fvets.2024.1497817)
+build 1a2b3c4
+```
+
+The tool version and the guideline edition are the two above. The **build commit** is the third,
+and it is what turns a version number into an exact state of the source — a released `9.0.0` and a
+locally built `9.0.0-SNAPSHOT` are not the same software, and the commit says which one produced a
+given result.
+
+A build made from a dirty working tree is marked as such:
+
+```
+build 1a2b3c4-dirty
+```
+
+A dirty build is **not presentable as a released version**. A jar built from uncommitted work and
+then attached to a paper is unreproducible, and nobody finds out for two years.
+
+## Maven versions and gitflow
+
+`-SNAPSHOT` is the mechanical marker for "this is not a thing anyone can cite".
+
+| Branch | Declared Maven version |
+|---|---|
+| `develop`, `feature/<name>` | `X.Y.Z-SNAPSHOT` |
+| `release/X.Y.Z`, `hotfix/X.Y.Z` | `X.Y.Z` — no suffix |
+| `main` | `X.Y.Z` — no suffix, equal to the tag without its `v` |
+
+A release tag is the tool version prefixed with `v`: `v9.1.0`. It points at a commit on `main`, and
+the artifact built from that commit reports exactly `9.1.0`.
+
+The version bump happens **on the `release/` branch, before the merge to `main`**, so that the tagged
+commit and the artifact agree by construction rather than by care. A release runs:
+
+1. branch `release/X.Y.Z` from `develop`
+2. drop the `-SNAPSHOT` suffix, commit
+3. pull request to `main`, merge, tag `vX.Y.Z` on `main`
+4. merge `main` back into `develop`, and open the next `-SNAPSHOT`
+
+Step 4 is the one that gets skipped — everything looks finished once `main` is tagged, and the next
+release then silently reverts whatever the last one fixed. CI checks it rather than trusting it: see
+[CONTRIBUTING.md](../CONTRIBUTING.md#branches).
+
+A tag whose name disagrees with the artifact built from its commit is a failed release, not a
+labelling detail. The release check fails on that mismatch rather than letting it publish.
