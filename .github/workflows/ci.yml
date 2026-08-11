@@ -1,0 +1,53 @@
+# The build is only enforced if it runs somewhere the author cannot skip.
+#
+# The commands below are the commands a contributor runs locally, verbatim. That is deliberate and
+# it is the rule most worth protecting here: the moment CI runs something a human does not, a green
+# tick stops meaning "your clone works" and starts meaning "CI works". If a step is worth running
+# here it is worth documenting in CONTRIBUTING.md, and if it is not worth documenting there it does
+# not belong here.
+
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# Cancel superseded runs on the same branch; the newest push is the only one whose answer matters.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The public-safety check reads every commit message via `git log --all`. A shallow
+          # checkout would hand it one commit and it would pass by seeing almost nothing — the
+          # failure mode where a check is technically running and effectively blind.
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+          # Cached for speed. The weekly uncached run in ci-uncached.yml exists because a cache
+          # can hide a dependency that resolves only because it is already there.
+          cache: maven
+
+      - name: Public-safety check
+        run: ./scripts/check-public-safe.sh
+
+      - name: Build
+        run: mvn clean verify
+
+      - name: Species scan self-test
+        run: ./scripts/check-core-species-free.test.sh
