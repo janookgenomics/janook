@@ -36,13 +36,19 @@ Two shell checks run alongside the build, and CI runs exactly these:
 ```sh
 ./scripts/check-public-safe.sh          # nothing unpublishable has been committed
 ./scripts/check-core-species-free.sh janook-core/src/main/java
+./scripts/check-release-version.sh      # the jar's version suits the branch it was built on
 ```
+
+The last one reads the version out of the built jar, so run it after `mvn clean verify`. It takes a
+ref if you want to ask a different question — `./scripts/check-release-version.sh refs/tags/v9.1.0`
+answers "would this be a valid release?" without creating the tag.
 
 Each has its own test suite, asserting that it fails when it should:
 
 ```sh
 ./scripts/check-public-safe.test.sh
 ./scripts/check-core-species-free.test.sh
+./scripts/check-release-version.test.sh
 ```
 
 **CI runs the same commands you just ran.** There are no CI-only steps. If something is worth running
