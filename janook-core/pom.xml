@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.janookgenomics</groupId>
     <artifactId>janook-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>9.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>janook-core</artifactId>
