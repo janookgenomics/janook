@@ -39,6 +39,7 @@ Pre-code. Reading and design.
 |---|---|
 | [docs/BACKGROUND.md](docs/BACKGROUND.md) | What AVCG is, prior art, who would use it |
 | [docs/PLAN.md](docs/PLAN.md) | What gets built, in what order, and the decisions behind it |
+| [docs/VERSIONING.md](docs/VERSIONING.md) | How Janook is versioned, and which AVCG edition a result was produced under |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to build it, how to test it, how to open a pull request |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Expected conduct, and where to report a problem |
 
