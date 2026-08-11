@@ -41,6 +41,11 @@ jobs:
       - name: Public-safety check
         run: ./scripts/check-public-safe.sh
 
+      - name: Public-safety self-test
+        # The check itself has a test suite asserting each of its rules fails when violated. A
+        # scan that is quietly misconfigured passes every run until the day it was needed.
+        run: ./scripts/check-public-safe.test.sh
+
       - name: Build with an empty local repository
         # Explicitly relocating the local repository, rather than trusting the runner to be clean,
         # so this stays true even if a future cache or a pre-warmed image appears.
