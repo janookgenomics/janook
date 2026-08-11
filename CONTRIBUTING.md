@@ -20,6 +20,15 @@ architectural checks. If it passes on a clean clone, your change is buildable.
 `verify` rather than `package` is deliberate. The enforcement plugins bind at `verify`, so a build
 that stops at `package` can pass while violating every architectural rule in the project.
 
+## Run it
+
+```sh
+java -jar janook-cli/target/janook-cli-<version>.jar --version
+```
+
+The build puts the runtime dependencies in `janook-cli/target/lib/`, and the jar's manifest points
+there. A single-file distribution comes later, with a launcher so nobody types this.
+
 ## Run the checks
 
 Two shell checks run alongside the build, and CI runs exactly these:

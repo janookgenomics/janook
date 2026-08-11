@@ -31,6 +31,100 @@
       <groupId>com.janookgenomics</groupId>
       <artifactId>janook-core</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <!--
+      Declaring <resources> here REPLACES the parent's block rather than adding to it, so the
+      LICENSE and NOTICE entries are restated below. Dropping them would silently ship a jar that
+      violates Apache-2.0 section 4, and nothing would fail to tell us.
+
+      Two entries cover src/main/resources because filtering is per-directory, not per-file: the
+      version properties file must be filtered, and everything else must not — a filtered binary
+      resource is a corrupted one, and that lesson is cheaper learned here than later.
+    -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>janook-version.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>janook-version.properties</exclude>
+        </excludes>
+      </resource>
+      <resource>
+        <directory>..</directory>
+        <targetPath>META-INF</targetPath>
+        <includes>
+          <include>LICENSE</include>
+          <include>NOTICE</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <plugins>
+      <!--
+        The main class, so the jar is runnable as java -jar rather than only from a classpath the
+        user has to assemble. A launcher will wrap this later; the manifest is what it wraps.
+
+        Class-Path alongside it, because a green test run proves nothing about the artifact: the
+        tests execute against the reactor's classpath, where janook-core is always present, while
+        java -jar sees only what the manifest names. Without this the build passes and the jar
+        throws NoClassDefFoundError on its first line of real work.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.janookgenomics.janook.cli.Janook</mainClass>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!--
+        Puts the runtime dependencies where that Class-Path says they are. Today that is
+        janook-core and nothing else — the core's no-third-party rule means this directory stays
+        small, and if it ever stops being small something has gone wrong upstream of here.
+
+        A jar plus a lib directory, not a single shaded artifact. Bundling everything into one file
+        is a distribution decision, and distribution has its own epic; this keeps the build honest
+        without pre-empting it.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>runtime-dependencies-beside-the-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
