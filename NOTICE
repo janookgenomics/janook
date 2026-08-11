@@ -1,0 +1,56 @@
+Janook
+Copyright 2026 The Janook Authors
+
+This product includes software developed by the Janook project.
+
+Licensed under the Apache License, Version 2.0. See LICENSE for the full text.
+
+"The Janook Authors" means the individuals who have contributed to this project. Copyright is held by
+each of them in their own work, not by an entity — Janook Genomics is a name, not an incorporated
+company, and a domain cannot hold rights. The contributors are identifiable from the repository's
+commit history.
+
+
+================================================================================
+THIRD-PARTY CONTENT
+================================================================================
+
+The Apache License above covers the Janook source code. It does NOT cover the
+material listed here, which is redistributed under its own terms and remains the
+work of its original authors.
+
+
+--------------------------------------------------------------------------------
+docs/fvets-11-1497817.pdf — the AVCG paper
+--------------------------------------------------------------------------------
+
+  Boeykens, F. et al. (2024). "Development and validation of animal variant
+  classification guidelines to objectively evaluate genetic variant pathogenicity
+  in domestic animals."
+  Frontiers in Veterinary Science 11:1497817.
+  https://doi.org/10.3389/fvets.2024.1497817
+
+  Licence:   Creative Commons Attribution 4.0 International (CC BY 4.0)
+             https://creativecommons.org/licenses/by/4.0/
+  Copyright: the authors.
+
+  Redistributed unmodified. CC BY 4.0 permits redistribution with attribution,
+  which this notice provides.
+
+  It is included because Janook implements the guidelines this paper defines, and
+  a reader checking whether the implementation is faithful should not have to go
+  looking for the specification. Criterion definitions, weights and the decision
+  tree all trace back to it.
+
+  AVCG is the standard. Janook is one implementation of it, and carries no
+  endorsement from the paper's authors.
+
+
+--------------------------------------------------------------------------------
+CODE_OF_CONDUCT.md
+--------------------------------------------------------------------------------
+
+  Adapted from the Contributor Covenant, version 2.1.
+  https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
+
+  Licence: Creative Commons Attribution 4.0 International (CC BY 4.0)
