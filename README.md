@@ -40,8 +40,22 @@ Pre-code. Reading and design.
 | [docs/BACKGROUND.md](docs/BACKGROUND.md) | What AVCG is, prior art, who would use it |
 | [docs/PLAN.md](docs/PLAN.md) | What gets built, in what order, and the decisions behind it |
 | [docs/VERSIONING.md](docs/VERSIONING.md) | How Janook is versioned, and which AVCG edition a result was produced under |
+| [docs/criteria/AVCG-2024.md](docs/criteria/AVCG-2024.md) | **The criteria Janook has encoded** — check them against the paper |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to build it, how to test it, how to open a pull request |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Expected conduct, and where to report a problem |
+
+## Check our work
+
+The AVCG criteria are transcribed **by hand** from Table 4 of the publication, and a transcription
+error would not be obvious in normal use — a wrong weight produces a wrong classification, silently.
+
+So the encoded criteria are published in full, generated from the code that actually runs:
+**[docs/criteria/AVCG-2024.md](docs/criteria/AVCG-2024.md)**. Every row names the table and page it
+came from, so any single claim can be checked against the paper in about a minute.
+
+If you find a discrepancy, please open an issue. It is a **correctness bug**, not a documentation
+one: under [docs/VERSIONING.md](docs/VERSIONING.md), changing a criterion's weight is a major
+version, because it can change a classification someone has already published.
 
 ## Licence
 
