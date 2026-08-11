@@ -36,9 +36,26 @@
     -->
     <maven.compiler.release>25</maven.compiler.release>
 
+    <archunit.version>1.4.1</archunit.version>
+    <junit.version>5.12.2</junit.version>
+
+    <!--
+      Overridable so a tripwire project built in a temporary directory can reach the real script
+      rather than shipping its own copy of the rule.
+
+      project.parent.basedir, not project.basedir: properties are re-evaluated in the inheriting
+      module, so project.basedir here would resolve to janook-core, not the repository root. Not
+      maven.multiModuleProjectDirectory either — without a .mvn marker directory it resolves to
+      the parent of the working directory, which is outside the repository entirely.
+    -->
+    <janook.species.scan.script>${project.parent.basedir}/scripts/check-core-species-free.sh</janook.species.scan.script>
+
+    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+    <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
     <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+    <maven-invoker-plugin.version>3.10.1</maven-invoker-plugin.version>
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
     <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
@@ -60,6 +77,20 @@
         <groupId>com.janookgenomics</groupId>
         <artifactId>janook-store</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${archunit.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -101,6 +132,128 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
           <version>${maven-install-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-invoker-plugin</artifactId>
+          <version>${maven-invoker-plugin.version}</version>
+        </plugin>
+        <!--
+          The species scan. Same reasoning as the enforcer rules above: configured here so the
+          tripwire project inherits the real binding and the real script, not a copy.
+
+          The script path is a property so a tripwire project built outside this reactor can point
+          at the same script from its own temporary directory.
+        -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>${exec-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>core-no-species-knowledge</id>
+              <phase>process-sources</phase>
+              <goals>
+                <goal>exec</goal>
+              </goals>
+              <configuration>
+                <executable>${janook.species.scan.script}</executable>
+                <arguments>
+                  <argument>${project.basedir}/src/main/java</argument>
+                </arguments>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!--
+          THE CORE BOUNDARY RULES.
+
+          These live in the parent rather than in janook-core so that the tripwire projects under
+          janook-core/src/it can inherit and trigger the *real* rules. A tripwire that tests a
+          copy of a rule proves only that the copy works.
+
+          Any module that wants these rules declares the plugin with no configuration of its own.
+          Today that is janook-core alone, and by design.
+
+          Bound to validate: these must fail before anything is compiled or downloaded, so a
+          violation costs a second rather than a full build.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>core-no-third-party-at-compile-scope</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <bannedDependencies>
+                    <message>
+ARCHITECTURAL RULE: janook-core must have no third-party dependencies at compile or runtime scope.
+
+WHY: janook-core is the classification engine, and it is meant to be embedded in someone else's
+pipeline — a Nextflow step, another JVM tool, a lab's in-house code. Every compile-scope dependency
+it acquires is imposed on all of them, and becomes a version conflict they have to resolve. A core
+that pulls in a YAML parser, a persistence layer or a web framework is a core nobody can embed.
+
+The pressure comes from the criterion definitions, which must be read from somewhere. Both
+acceptable answers keep this rule intact: parse outside core and hand it a built object, or generate
+core's criterion table at build time. Adding the parser here is the one answer that is not available.
+
+Test-scope dependencies are unaffected and always were.
+                    </message>
+                    <searchTransitive>true</searchTransitive>
+                    <excludes>
+                      <exclude>*:*:*:*:compile</exclude>
+                      <exclude>*:*:*:*:runtime</exclude>
+                    </excludes>
+                  </bannedDependencies>
+                </rules>
+                <fail>true</fail>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>core-no-dependency-on-outer-modules</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <bannedDependencies>
+                    <message>
+ARCHITECTURAL RULE: janook-core must not depend on janook-cli, janook-store or janook-web. The
+arrow points one way only.
+
+WHY: the outer modules exist to serve the core, never the reverse. A core that reaches back into
+the CLI to read a file, or into the store to save a result, has stopped being a pure function from
+evidence to classification — and it drags the whole application in behind it for anyone trying to
+embed it.
+
+If the core appears to need something from an outer module, the dependency is inverted: define the
+interface in core and let the outer module implement it.
+
+This rule applies at every scope, including test. A test that needs the store is an integration
+test and belongs in the module that owns the integration.
+                    </message>
+                    <searchTransitive>true</searchTransitive>
+                    <excludes>
+                      <exclude>com.janookgenomics:janook-cli</exclude>
+                      <exclude>com.janookgenomics:janook-store</exclude>
+                      <exclude>com.janookgenomics:janook-web</exclude>
+                    </excludes>
+                  </bannedDependencies>
+                </rules>
+                <fail>true</fail>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
