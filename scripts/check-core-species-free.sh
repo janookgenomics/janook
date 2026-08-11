@@ -50,8 +50,8 @@ TOKENS=(
   pig porcine swine
   sheep ovine
   goat caprine
-  chicken
-  rabbit
+  chicken gallinaceous
+  rabbit leporine
 )
 
 PATTERN=$(printf '%s|' "${TOKENS[@]}")
