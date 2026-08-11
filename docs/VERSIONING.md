@@ -58,10 +58,30 @@ the name to something immutable:
 Crossref's current display guidance, and the URL resolves for anyone who pastes it — which is the
 point of citing a DOI rather than a journal page.
 
-When the ISAG working group revises the criteria, the next identifier is `AVCG-<year>` pinned to its
-own DOI. Nothing is renamed retrospectively: `AVCG-2024` keeps meaning exactly what it means today.
-That is why an edition is named rather than tracked as "latest" — a classification made under one
-edition stays interpretable after the next one appears.
+**The identifier is a name Janook gives a DOI — not a value derived from a publication year.** The
+year is there because it is what the field says out loud, but the DOI is the part that is actually
+immutable. The mapping from identifier to DOI is a table this project maintains; it is never a string
+computed from a date.
+
+Two rules follow, both cheap to state now and awkward to retrofit once results are stored:
+
+- **A second full edition in the same calendar year takes a suffix** — `AVCG-2024.2`. Consensus
+  guidelines of this kind are revised on multi-year cycles, so this is unlikely; the point is that
+  the identifier must not be *capable* of colliding.
+- **An amendment carrying its own DOI gets its own identifier.** This is the likelier event by some
+  margin. A rulebook of this kind changes by correction, erratum or criterion-specific specification
+  far more often than by republication, and the danger is not two editions in one year — it is the
+  criteria shifting with no new citation to point at. Where the change has a DOI, Janook names it.
+  Where it has none, there is nothing to pin, and that gets recorded as an open question rather than
+  absorbed quietly into `AVCG-2024`.
+
+Nothing is ever renamed retrospectively: `AVCG-2024` keeps meaning exactly what it means today. That
+is the reason for naming an edition instead of tracking "latest" — a classification made under one
+edition stays interpretable after the next one lands.
+
+The guidelines are maintained by ISAG's **Variant Pathogenicity Working Group**, under its Animal
+Genetic Testing Standardization committee. The working group has published no version scheme or
+revision cadence of its own, which is precisely why Janook needs one.
 
 ## What `janook --version` reports
 
