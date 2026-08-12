@@ -23,11 +23,27 @@ that stops at `package` can pass while violating every architectural rule in the
 ## Run it
 
 ```sh
+./scripts/janook --version
+./scripts/janook explain PS5
+./scripts/janook explain --list
+```
+
+That wrapper finds the newest jar under `janook-cli/target/` and runs it, so you never type a
+version number. It does not build — run `mvn clean package` first, and it will tell you so if you
+forget.
+
+The underlying command is:
+
+```sh
 java -jar janook-cli/target/janook-cli-<version>.jar --version
 ```
 
 The build puts the runtime dependencies in `janook-cli/target/lib/`, and the jar's manifest points
-there. A single-file distribution comes later, with a launcher so nobody types this.
+there.
+
+**`scripts/janook` is a development convenience, not the launcher we ship.** The installed command
+comes from packaging — a Bioconda recipe declaring `openjdk`, with a wrapper on `PATH` — which does
+not exist yet. Docs elsewhere write examples as plain `janook ...` because that is what they will be.
 
 ## Run the checks
 
