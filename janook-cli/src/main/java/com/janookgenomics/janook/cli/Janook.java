@@ -6,15 +6,17 @@ import java.io.PrintStream;
 /**
  * The {@code janook} command.
  *
- * <p>Today it answers one question — which version of what am I running — because a classification
- * that cannot name the tool and the guideline edition that produced it is not reproducible.
+ * <p>Two questions so far, both about trust rather than classification: which version of what am I
+ * running, and what does this tool believe a criterion says. Classification itself needs the
+ * decision tree, which does not exist yet.
  */
 public final class Janook {
 
-    /** Conventional exit status for a usage error, distinct from a run that failed on its merits. */
-    private static final int USAGE_ERROR = 2;
-
-    private static final String USAGE = "usage: janook --version";
+    private static final String USAGE =
+            """
+            usage: janook --version
+                   janook explain <criterion>
+                   janook explain --list""";
 
     public static void main(String[] args) {
         System.exit(run(args, System.out, System.err));
@@ -27,10 +29,15 @@ public final class Janook {
     static int run(String[] args, PrintStream out, PrintStream err) {
         if (args.length == 1 && "--version".equals(args[0])) {
             printVersion(out);
-            return 0;
+            return ExitStatus.OK;
+        }
+        if (args.length == 2 && "explain".equals(args[0])) {
+            return "--list".equals(args[1])
+                    ? ExplainCommand.list(out)
+                    : ExplainCommand.run(args[1], out, err);
         }
         err.println(USAGE);
-        return USAGE_ERROR;
+        return ExitStatus.USAGE_ERROR;
     }
 
     /**
