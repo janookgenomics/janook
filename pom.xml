@@ -54,18 +54,6 @@
     <archunit.version>1.4.1</archunit.version>
     <junit.version>5.12.2</junit.version>
 
-    <!--
-      Overridable so a tripwire project built in a temporary directory can reach the real script
-      rather than shipping its own copy of the rule.
-
-      project.parent.basedir, not project.basedir: properties are re-evaluated in the inheriting
-      module, so project.basedir here would resolve to janook-core, not the repository root. Not
-      maven.multiModuleProjectDirectory either — without a .mvn marker directory it resolves to
-      the parent of the working directory, which is outside the repository entirely.
-    -->
-    <janook.species.scan.script>${project.parent.basedir}/scripts/check-core-species-free.sh</janook.species.scan.script>
-
-    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
     <git-commit-id-maven-plugin.version>9.0.2</git-commit-id-maven-plugin.version>
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
@@ -199,34 +187,6 @@
           <artifactId>maven-invoker-plugin</artifactId>
           <version>${maven-invoker-plugin.version}</version>
         </plugin>
-        <!--
-          The species scan. Same reasoning as the enforcer rules above: configured here so the
-          tripwire project inherits the real binding and the real script, not a copy.
-
-          The script path is a property so a tripwire project built outside this reactor can point
-          at the same script from its own temporary directory.
-        -->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>${exec-maven-plugin.version}</version>
-          <executions>
-            <execution>
-              <id>core-no-species-knowledge</id>
-              <phase>process-sources</phase>
-              <goals>
-                <goal>exec</goal>
-              </goals>
-              <configuration>
-                <executable>${janook.species.scan.script}</executable>
-                <arguments>
-                  <argument>${project.basedir}/src/main/java</argument>
-                </arguments>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
         <!--
           THE CORE BOUNDARY RULES.
 

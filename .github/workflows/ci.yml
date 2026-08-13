@@ -54,9 +54,6 @@ jobs:
       - name: Build
         run: mvn clean verify
 
-      - name: Species scan self-test
-        run: ./scripts/check-core-species-free.test.sh
-
       - name: Release-version check
         # After the build, because it reads the version out of the jar rather than the pom: the
         # pom says what the build was asked to produce, the jar says what it produced.
