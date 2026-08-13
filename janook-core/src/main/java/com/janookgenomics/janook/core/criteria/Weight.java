@@ -18,17 +18,17 @@ public enum Weight {
     MODERATE("M", "moderate"),
     SUPPORTIVE("P", "supportive");
 
-    private final char[] letters;
+    private final String letters;
     private final String label;
 
     Weight(String letters, String label) {
-        this.letters = letters.toCharArray();
+        this.letters = letters;
         this.label = label;
     }
 
     /** The letters this weight contributes to a criterion code: {@code VS}, {@code S}, … */
     public String letters() {
-        return new String(letters);
+        return letters;
     }
 
     /** The paper's wording, for anything a human reads. */

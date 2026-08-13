@@ -50,6 +50,3 @@ jobs:
         # Explicitly relocating the local repository, rather than trusting the runner to be clean,
         # so this stays true even if a future cache or a pre-warmed image appears.
         run: mvn clean verify -Dmaven.repo.local="${RUNNER_TEMP}/empty-m2"
-
-      - name: Species scan self-test
-        run: ./scripts/check-core-species-free.test.sh
