@@ -115,31 +115,10 @@
         </executions>
         <configuration>
           <!--
-            Shell out to git rather than use the plugin's bundled JGit.
-
-            JGit measures the filesystem's timestamp resolution by writing .git/.probe-<uuid>,
-            reading it back and deleting it. On macOS it intermittently loses that race and prints
-            a FileNotFoundException stack trace *after* BUILD SUCCESS — and because it caches the
-            measurement in ~/.config/jgit/config, a machine without that file re-measures on every
-            build and sees it again and again. A stack trace after a successful build teaches
-            people to skim past ERROR lines, which is a worse defect than the one it reports.
-
-            It also makes the dirty flag mean exactly what git status means, rather than JGit's
-            approximation of it — this project marks releases on that flag, so the two agreeing
-            matters.
-
-            Three environments, all three verified rather than assumed:
-
-              .git present, git works    -> the commit, plus -dirty when the tree is not clean
-              no .git at all             -> the fallbacks above, reported as "build unknown"
-              .git present, git broken   -> THE BUILD FAILS
-
-            The last one is the price of this setting, and it is deliberate.
-            failOnUnableToExtractRepoInfo does not cover it — a git command that exits non-zero
-            aborts the build regardless. That is acceptable because it cannot touch the path
-            packagers use: a release tarball has no .git, so it takes the second row. Reaching the
-            third means a repository present with a broken git alongside it, which is a broken
-            environment reporting itself with an actionable message rather than a tool guessing.
+            Shell out to git rather than use the plugin's bundled JGit. Not a preference: JGit
+            prints a stack trace after BUILD SUCCESS on macOS, and this setting makes the dirty
+            flag mean what git status means. The three build environments this was verified
+            against, and what each one costs, are in docs/DECISIONS.md.
           -->
           <useNativeGit>true</useNativeGit>
           <!-- The repository root: this module sits one level below it. -->
@@ -161,10 +140,9 @@
         The main class, so the jar is runnable as java -jar rather than only from a classpath the
         user has to assemble. A launcher will wrap this later; the manifest is what it wraps.
 
-        Class-Path alongside it, because a green test run proves nothing about the artifact: the
-        tests execute against the reactor's classpath, where janook-core is always present, while
-        java -jar sees only what the manifest names. Without this the build passes and the jar
-        throws NoClassDefFoundError on its first line of real work.
+        Class-Path alongside it: without it the build passes and the jar throws
+        NoClassDefFoundError, because tests run on the reactor classpath and java -jar does not.
+        See docs/DECISIONS.md.
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -181,13 +159,8 @@
       </plugin>
 
       <!--
-        Puts the runtime dependencies where that Class-Path says they are. Today that is
-        janook-core and nothing else — the core's no-third-party rule means this directory stays
-        small, and if it ever stops being small something has gone wrong upstream of here.
-
-        A jar plus a lib directory, not a single shaded artifact. Bundling everything into one file
-        is a distribution decision, and distribution has its own epic; this keeps the build honest
-        without pre-empting it.
+        Puts the runtime dependencies where that Class-Path says they are. A jar plus a lib
+        directory, not a single shaded artifact — see docs/DECISIONS.md.
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

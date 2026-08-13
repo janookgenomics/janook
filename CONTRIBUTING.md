@@ -51,11 +51,10 @@ Two shell checks run alongside the build, and CI runs exactly these:
 
 ```sh
 ./scripts/check-public-safe.sh          # nothing unpublishable has been committed
-./scripts/check-core-species-free.sh janook-core/src/main/java
 ./scripts/check-release-version.sh      # the jar's version suits the branch it was built on
 ```
 
-The last one reads the version out of the built jar, so run it after `mvn clean verify`. It takes a
+The second reads the version out of the built jar, so run it after `mvn clean verify`. It takes a
 ref if you want to ask a different question — `./scripts/check-release-version.sh refs/tags/v9.1.0`
 answers "would this be a valid release?" without creating the tag.
 
@@ -63,9 +62,10 @@ Each has its own test suite, asserting that it fails when it should:
 
 ```sh
 ./scripts/check-public-safe.test.sh
-./scripts/check-core-species-free.test.sh
 ./scripts/check-release-version.test.sh
 ```
+
+Everything else is enforced inside `mvn clean verify` — a rule that can be a test should be one.
 
 **CI runs the same commands you just ran.** There are no CI-only steps. If something is worth running
 in CI it is documented here, and if it is not documented here it does not run in CI. The moment those
@@ -85,16 +85,19 @@ evidence to classification; reading files belongs to `janook-cli`, persistence t
 
 **No species knowledge.** The engine is species-agnostic and the data is not. A hardcoded species name
 turns "add the tenth species" from a config change into a rewrite. If the scan flags a false positive,
-suppress it with a reason:
+suppress that line and say why:
 
 ```java
 // janook:allow-species reason="why this is not species knowledge"
 ```
 
-The reason is required. A justification nobody had to write is one nobody thought about.
+The reason is not machine-checked — write one anyway.
 
-Each rule has a deliberately-failing project under `janook-core/src/it` proving it still fires. If you
-change a rule, change its tripwire.
+Every rule carries a tripwire proving it still fires, because a rule that is silently misconfigured
+passes every build forever and is discovered on the day it was needed. The dependency rules are
+enforced by the build, so theirs are deliberately-failing projects under `janook-core/src/it`; the
+no-I/O and no-species rules are tests, so theirs are tests beside them. If you change a rule, change
+its tripwire.
 
 ## Branches
 
