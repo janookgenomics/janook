@@ -37,24 +37,21 @@ final class ExplainCommand {
 
             // The likeliest miss by far is a human code that AVCG renumbered, and we can answer it
             // exactly rather than guess: BP7 is BP6, PP1 is PS5, PM5 is PM2.
-            Optional<Criterion> renamed = whatAcmgCodeBecame(code);
-            renamed.ifPresent(
-                    criterion ->
-                            err.println(
-                                    "  ACMG/AMP "
-                                            + code
-                                            + " is "
-                                            + Avcg2024.edition().identifier()
-                                            + " "
-                                            + criterion.code()
-                                            + "."));
+            //
+            // Nothing beyond that. Anything else is a guess at what someone meant out of a list of
+            // twenty-three that --list prints in full, on the next line.
+            whatAcmgCodeBecame(code)
+                    .ifPresent(
+                            criterion ->
+                                    err.println(
+                                            "  ACMG/AMP "
+                                                    + code
+                                                    + " is "
+                                                    + Avcg2024.edition().identifier()
+                                                    + " "
+                                                    + criterion.code()
+                                                    + "."));
 
-            if (renamed.isEmpty()) {
-                List<String> suggestions = suggestionsFor(code);
-                if (!suggestions.isEmpty()) {
-                    err.println("  did you mean: " + String.join(", ", suggestions) + "?");
-                }
-            }
             err.println("  all 23 criteria: janook explain --list");
             return ExitStatus.REJECTED_INPUT;
         }
@@ -138,30 +135,6 @@ final class ExplainCommand {
                                     case AcmgOrigin.NewInAvcg ignored -> false;
                                 })
                 .findFirst();
-    }
-
-    /**
-     * Codes worth offering after a miss: anything sharing a prefix with what was typed, in either
-     * direction, so {@code PP1x} finds {@code PP1} and {@code PS} finds all five.
-     */
-    private static List<String> suggestionsFor(String code) {
-        if (code.isEmpty()) {
-            return List.of();
-        }
-        List<String> byPrefix =
-                Avcg2024.all().stream()
-                        .map(Criterion::code)
-                        .filter(known -> known.startsWith(code) || code.startsWith(known))
-                        .toList();
-        if (!byPrefix.isEmpty()) {
-            return byPrefix;
-        }
-        // Fall back to the same direction and weight — a typo in the number.
-        String stem = code.replaceAll("\\d+$", "");
-        return Avcg2024.all().stream()
-                .map(Criterion::code)
-                .filter(known -> !stem.isEmpty() && known.startsWith(stem))
-                .toList();
     }
 
     /** Where a continuation line starts: under the value, not under the label. */

@@ -79,15 +79,10 @@ class ExplainCommandTest {
     }
 
     @Test
-    @DisplayName("a near miss suggests the codes it could have been")
-    void nearMissSuggests() {
-        run("explain", "PP1x");
-        assertTrue(stderr().contains("did you mean: PP1?"), stderr());
-
-        err.reset();
-        run("explain", "PS9");
-        assertTrue(stderr().contains("PS1"), stderr());
-        assertTrue(stderr().contains("PS5"), stderr());
+    @DisplayName("a miss we cannot answer exactly points at the full list rather than guessing")
+    void unanswerableMissPointsAtTheList() {
+        assertEquals(1, run("explain", "PP1x"));
+        assertTrue(stderr().contains("all 23 criteria: janook explain --list"), stderr());
     }
 
     @ParameterizedTest
@@ -98,7 +93,6 @@ class ExplainCommandTest {
         // We hold the mapping, so the answer is precise rather than a list of near misses.
         assertEquals(1, run("explain", typed));
         assertTrue(stderr().contains("ACMG/AMP BP7 is AVCG-2024 BP6."), stderr());
-        assertFalse(stderr().contains("did you mean"), "guessed when it knew: " + stderr());
     }
 
     @Test
