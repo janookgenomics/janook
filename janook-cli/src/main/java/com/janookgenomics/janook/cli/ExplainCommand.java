@@ -13,10 +13,10 @@ import java.util.Optional;
 /**
  * {@code janook explain <code>} — what a criterion is, what it weighs, and what it was in ACMG/AMP.
  *
- * <p>This is the audit surface. A published file can always be something the engine ignores;
- * this prints from the same model that will classify variants, so what it says is what the tool
- * will do. It is also the answer to the question most of this tool's users will actually have,
- * which is not "what is PS5" but "what changed from the human guidelines".
+ * <p>This prints from the same model that will classify variants, so what it says is what the tool
+ * will do — a published file, by contrast, could always drift from the code that runs. It also
+ * answers the question most of this tool's users will actually have, which is not "what is PS5"
+ * but "what changed from the human guidelines".
  */
 final class ExplainCommand {
 
@@ -184,9 +184,9 @@ final class ExplainCommand {
     /**
      * Enough of a definition to recognise it in a list, without wrapping the terminal.
      *
-     * <p>Cut on length alone. Cutting at the first comma looked tidier and turned {@code PVS1} into
-     * "Null variant (nonsense" — a truncation that reads like a complete thought is worse than one
-     * that obviously is not.
+     * <p>Cut on length alone. Cutting at the first comma looked tidier, but it turned {@code PVS1}
+     * into "Null variant (nonsense" — which reads like a whole definition and misleads, where an
+     * ellipsis is obviously incomplete.
      */
     private static String preview(String definition) {
         return definition.length() <= 60 ? definition : definition.substring(0, 57) + "...";

@@ -45,7 +45,7 @@ public sealed interface AcmgOrigin {
         }
     }
 
-    /** A different code in ACMG/AMP. The one that catches people out. */
+    /** A different code in ACMG/AMP. The case most likely to mislead an ACMG/AMP reader. */
     record Renumbered(String acmgCode, String change) implements AcmgOrigin {
         public Renumbered {
             Objects.requireNonNull(acmgCode, "acmgCode");

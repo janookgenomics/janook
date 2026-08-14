@@ -38,8 +38,7 @@ public final class Avcg2024 {
 
     /**
      * Retained from ACMG/AMP by code, but AVCG widened it: loss-of-function evidence may come from
-     * another species. That is the whole reason these guidelines exist, so it is the first thing
-     * transcribed.
+     * another species. That cross-species widening is the central idea of the guidelines.
      */
     public static final Criterion PVS1 =
             new Criterion(
@@ -112,9 +111,9 @@ public final class Avcg2024 {
                     new AcmgOrigin.Retained("PS4"));
 
     /**
-     * The renaming that catches people out. This is ACMG's {@code PP1}, promoted from supporting to
-     * strong — so anyone reading it as "the supporting cosegregation criterion" has both the code
-     * and the weight wrong.
+     * The renaming most likely to mislead a reader who knows the human guidelines. This is ACMG's
+     * {@code PP1}, promoted from supporting to strong — so anyone reading it as "the supporting
+     * cosegregation criterion" has both the code and the weight wrong.
      */
     public static final Criterion PS5 =
             new Criterion(
@@ -369,9 +368,9 @@ public final class Avcg2024 {
 
     /**
      * Inventory order: pathogenic before benign, and within each, descending weight then number.
-     * This is the order Table 4 uses and the order the generated reference emits. Fixed, because
-     * the Definition of Done requires identical bytes from identical input, and a map's iteration
-     * order is not a promise.
+     * This is the order Table 4 uses and the order the generated reference emits. Held as a fixed
+     * list because identical input must produce identical bytes, and the iteration order of a map
+     * is not guaranteed.
      */
     private static final List<Criterion> ALL =
             List.of(
@@ -402,8 +401,9 @@ public final class Avcg2024 {
     }
 
     /**
-     * An unknown code yields an empty result rather than an exception: a user typing {@code PS9} is
-     * asking a question, not causing a failure, and the caller is better placed to say so.
+     * An unknown code yields an empty result rather than an exception: a user typing {@code PS9}
+     * has asked about a criterion that does not exist, and the caller can report that better than
+     * an exception can.
      */
     public static Optional<Criterion> byCode(String code) {
         return Optional.ofNullable(code).map(BY_CODE::get);

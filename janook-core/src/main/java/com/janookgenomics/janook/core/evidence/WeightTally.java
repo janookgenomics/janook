@@ -1,8 +1,6 @@
 package com.janookgenomics.janook.core.evidence;
 
 import com.janookgenomics.janook.core.criteria.Criterion;
-import com.janookgenomics.janook.core.criteria.Direction;
-import com.janookgenomics.janook.core.criteria.Weight;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,8 +18,8 @@ import java.util.Objects;
  *
  * <p><strong>Six groups, not eight.</strong> AVCG's weights are not symmetric — the benign criteria
  * are only {@code BS} (strong) and {@code BP} (supportive), so there is no benign very-strong and no
- * benign moderate. Those two are not offered rather than offered and always empty, because a group
- * that can never be filled is one a later reader will try to fill.
+ * benign moderate. Those two groups are not offered, rather than offered and always empty: an
+ * always-empty group would only invite later code to try to fill it.
  *
  * @param pathogenicVeryStrong met criteria weighing very strong for pathogenicity — only {@code
  *     PVS1} can appear here
@@ -70,57 +68,37 @@ public record WeightTally(
 
         for (Criterion criterion : met) {
             Objects.requireNonNull(criterion, "criterion");
-            groupFor(
-                            criterion,
-                            pVeryStrong,
-                            pStrong,
-                            pModerate,
-                            pSupportive,
-                            bStrong,
-                            bSupportive)
-                    .add(criterion);
+            List<Criterion> group =
+                    switch (criterion.direction()) {
+                        case PATHOGENIC ->
+                                switch (criterion.weight()) {
+                                    case VERY_STRONG -> pVeryStrong;
+                                    case STRONG -> pStrong;
+                                    case MODERATE -> pModerate;
+                                    case SUPPORTIVE -> pSupportive;
+                                };
+                        case BENIGN ->
+                                switch (criterion.weight()) {
+                                    case STRONG -> bStrong;
+                                    case SUPPORTIVE -> bSupportive;
+                                    // AVCG defines no benign very-strong or benign moderate
+                                    // criterion, so reaching here means a Criterion was built by
+                                    // hand rather than taken from an edition. Refusing it surfaces
+                                    // the mistake; filing it in an invented group would hide it.
+                                    case VERY_STRONG, MODERATE ->
+                                            throw new IllegalArgumentException(
+                                                    "AVCG has no benign "
+                                                            + criterion.weight().label()
+                                                            + " criterion, but "
+                                                            + criterion.code()
+                                                            + " claims to be one");
+                                };
+                    };
+            group.add(criterion);
         }
 
         return new WeightTally(
                 pVeryStrong, pStrong, pModerate, pSupportive, bStrong, bSupportive);
-    }
-
-    private static List<Criterion> groupFor(
-            Criterion criterion,
-            List<Criterion> pVeryStrong,
-            List<Criterion> pStrong,
-            List<Criterion> pModerate,
-            List<Criterion> pSupportive,
-            List<Criterion> bStrong,
-            List<Criterion> bSupportive) {
-
-        Direction direction = criterion.direction();
-        Weight weight = criterion.weight();
-
-        return switch (direction) {
-            case PATHOGENIC ->
-                    switch (weight) {
-                        case VERY_STRONG -> pVeryStrong;
-                        case STRONG -> pStrong;
-                        case MODERATE -> pModerate;
-                        case SUPPORTIVE -> pSupportive;
-                    };
-            case BENIGN ->
-                    switch (weight) {
-                        case STRONG -> bStrong;
-                        case SUPPORTIVE -> bSupportive;
-                        // AVCG defines no benign very-strong or benign moderate criterion, so
-                        // reaching here means a Criterion was built by hand rather than taken from
-                        // an edition. Failing is better than inventing a group for it.
-                        case VERY_STRONG, MODERATE ->
-                                throw new IllegalArgumentException(
-                                        "AVCG has no benign "
-                                                + weight.label()
-                                                + " criterion, but "
-                                                + criterion.code()
-                                                + " claims to be one");
-                    };
-        };
     }
 
     /** True when no criterion is met. A normal input, not an error — it classifies as uncertain. */

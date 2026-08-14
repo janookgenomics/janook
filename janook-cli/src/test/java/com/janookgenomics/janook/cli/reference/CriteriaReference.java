@@ -12,56 +12,65 @@ import java.util.Locale;
  * I/O and I/O is not the core's work, and nothing a user runs needs this — the artefact it produces
  * is committed, and {@code janook explain} serves the same facts at the command line.
  *
- * <p><strong>Deterministic by construction.</strong> No timestamp, no version of the tool, no
- * ordering that depends on a hash. The output must be a function of the criteria alone, or the
- * staleness check fails on days when nothing changed and every build dirties the working tree —
- * which the release check then rejects.
+ * <p><strong>Deterministic, deliberately.</strong> No timestamp, no version of the tool, no
+ * ordering that depends on a hash. The output must be a function of the criteria alone; anything
+ * else would make the staleness check fail on days when nothing changed, and every refresh would
+ * dirty the working tree — which the release check then rejects.
  */
 final class CriteriaReference {
 
     static String render() {
         GuidelineEdition edition = Avcg2024.edition();
-        StringBuilder out = new StringBuilder();
 
-        out.append("# The AVCG criteria as Janook has encoded them\n\n")
-                .append("**Edition:** `")
-                .append(edition.identifier())
-                .append("` — ")
-                .append(edition.doiUrl())
-                .append("\n\n")
-                .append("This file is **generated** from the criterion model in `janook-core` and")
-                .append(" committed. It is not\nthe source of truth; it is what the source of")
-                .append(" truth says, in a form you can read without\nopening any Java. The build")
-                .append(" fails if the two fall out of step.\n\n")
-                .append("Definitions are quoted **verbatim** from Table 4 of the publication")
-                .append(" (CC BY 4.0 — see\n[NOTICE](../../NOTICE)). They are the guideline's")
-                .append(" words, not ours.\n\n")
-                .append("**The ACMG/AMP origin column is ours, and appears in neither paper.**")
-                .append(" It is our annotation,\nwritten by comparing Table 4 against the 2015")
-                .append(" ACMG/AMP guidelines\n(Richards et al.,")
-                .append(" https://doi.org/10.1038/gim.2015.30). Read it as a note from us, not")
-                .append(" as\nguideline text — and if it is wrong, that is our error and worth")
-                .append(" reporting too.\n\n")
-                .append("## Please check this against the paper\n\n")
-                .append("These criteria were transcribed by hand. We have checked them, but a")
-                .append(" transcription error is\npossible and would not be obvious in normal use —")
-                .append(" a wrong weight produces a wrong\nclassification silently. Every row names")
-                .append(" the table and page it came from, so any single\nclaim here can be checked")
-                .append(" in about a minute.\n\n")
-                .append("**If you find a discrepancy, please open an issue.** It will be treated as")
-                .append(" a correctness bug,\nnot a documentation one: under")
-                .append(" [docs/VERSIONING.md](../VERSIONING.md) a change to any\ncriterion's")
-                .append(" weight is a major version, because it can change a classification someone")
-                .append("\nalready published.\n\n")
-                .append("## Reading the codes\n\n")
-                .append("A code designates direction, then weight, then a number: `P` or `B`, then")
-                .append(" `VS`, `S`, `M` or\n`P`. So `PS5` is pathogenic, strong.\n\n")
-                .append("**A shared code is not a shared criterion.** AVCG renumbered when criteria")
-                .append(" were removed, so\nACMG/AMP's `PP1` is AVCG's `PS5`, and AVCG's `PP1` is")
-                .append(" something new. The origin column\nsays what each one was.\n\n")
-                .append("## Criteria\n\n")
-                .append("| Code | Direction | Weight | ACMG/AMP origin | Source | Definition |\n")
-                .append("|---|---|---|---|---|---|\n");
+        String header =
+                """
+                # The AVCG criteria as Janook has encoded them
+
+                **Edition:** `%s` — %s
+
+                This file is **generated** from the criterion model in `janook-core` and committed.
+                It is not the source of truth; it shows what the source of truth says, in a form you
+                can read without opening any Java. The build fails if the two fall out of step.
+
+                Definitions are quoted **verbatim** from Table 4 of the publication (CC BY 4.0 — see
+                [NOTICE](../../NOTICE)). They are the guideline's words, not ours.
+
+                **The ACMG/AMP origin column is ours, and appears in neither paper.** It is our
+                annotation, written by comparing Table 4 against the 2015 ACMG/AMP guidelines
+                (Richards et al., https://doi.org/10.1038/gim.2015.30). Read it as a note from us,
+                not as guideline text — and if it is wrong, that is our error and worth reporting
+                too.
+
+                ## Please check this against the paper
+
+                These criteria were transcribed by hand. We have checked them, but a transcription
+                error is possible, and it would not be obvious in normal use: a wrong weight
+                produces a wrong classification, and nothing about the output would look unusual.
+                Every row names the table and page it came from, so any single claim here can be
+                checked against the paper in about a minute.
+
+                **If you find a discrepancy, please open an issue.** It will be treated as a
+                correctness bug, not a documentation problem: under
+                [docs/VERSIONING.md](../VERSIONING.md) a change to any criterion's weight is a major
+                version, because it can change a classification someone already published.
+
+                ## Reading the codes
+
+                A code names its direction, then its weight, then a number: `P` or `B`, then `VS`,
+                `S`, `M` or `P`. So `PS5` is pathogenic, strong.
+
+                **A shared code is not a shared criterion.** AVCG renumbered when criteria were
+                removed, so ACMG/AMP's `PP1` is AVCG's `PS5`, and AVCG's `PP1` is something new. The
+                origin column says what each one was.
+
+                ## Criteria
+
+                | Code | Direction | Weight | ACMG/AMP origin | Source | Definition |
+                |---|---|---|---|---|---|
+                """
+                        .formatted(edition.identifier(), edition.doiUrl());
+
+        StringBuilder out = new StringBuilder(header);
 
         for (Criterion criterion : Avcg2024.all()) {
             out.append("| `")

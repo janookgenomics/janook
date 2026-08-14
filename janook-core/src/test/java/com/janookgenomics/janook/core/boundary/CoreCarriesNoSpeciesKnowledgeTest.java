@@ -57,8 +57,9 @@ class CoreCarriesNoSpeciesKnowledgeTest {
 
     /**
      * An escape hatch for the false positive this will eventually produce — a verbatim quotation, a
-     * reference to the feline truth set. Write the reason in the comment; it is not machine-checked,
-     * because a rule that has never fired does not need a grammar for excusing it.
+     * reference to the feline truth set. Write the reason in the comment. The reason is not
+     * machine-checked: the rule has never fired yet, so a checked format for its exceptions would
+     * be machinery ahead of any need.
      */
     private static final String MARKER = "janook:allow-species";
 
@@ -97,8 +98,8 @@ class CoreCarriesNoSpeciesKnowledgeTest {
         assertEquals(
                 List.of("felis", "catus"),
                 speciesTokensIn("    return species.equals(\"felis_catus\");"),
-                "The scan reported nothing against a hardcoded binomial. It is not working, which "
-                        + "means every clean build since it was added has been meaningless.");
+                "The scan reported nothing against a hardcoded binomial. It is not working, so "
+                        + "every clean build since it was added has proven nothing.");
 
         assertEquals(
                 List.of("felis"),
