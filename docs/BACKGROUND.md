@@ -11,7 +11,8 @@ Boeykens et al. 2024, *Front. Vet. Sci.* 11:1497817. Full text at
 [`fvets-11-1497817.pdf`](fvets-11-1497817.pdf) — CC-BY. Table and section numbers below refer to it.
 
 - **23 criteria** — 14 supporting pathogenicity, 9 supporting benignity (Table 4)
-- Weights: very strong, strong, moderate, supporting
+- Weights: very strong, strong, moderate, supportive — the paper's word is *supportive*, where
+  ACMG/AMP says *supporting* (Table 4 footnote)
 - A two-branch decision tree combines them into **P / LP / VUS / LB / B** (Table 6)
 - Criterion codes: `PVS1`, `PS1–PS5`, `PM1–PM4`, `PP1–PP4`, `BS1–BS3`, `BP1–BP6`. **Not the ACMG
   ranges** — there is no `BS4` and no `BP7`. AVCG renumbered to close the gaps left by removed

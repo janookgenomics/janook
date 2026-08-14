@@ -20,7 +20,8 @@ identically every time and shows its work.
 
 ## Status
 
-Pre-code. Reading and design.
+Early development. The 23 criteria are encoded and `janook explain` works. Classification itself —
+the decision tree that turns evidence into a label — does not exist yet.
 
 ## Why build it
 
@@ -40,6 +41,7 @@ Pre-code. Reading and design.
 | [docs/BACKGROUND.md](docs/BACKGROUND.md) | What AVCG is, prior art, who would use it |
 | [docs/PLAN.md](docs/PLAN.md) | What gets built, in what order, and the decisions behind it |
 | [docs/VERSIONING.md](docs/VERSIONING.md) | How Janook is versioned, and which AVCG edition a result was produced under |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Build and tooling decisions, what they cost, and why they were made |
 | [docs/criteria/AVCG-2024.md](docs/criteria/AVCG-2024.md) | **The criteria Janook has encoded** — check them against the paper |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to build it, how to test it, how to open a pull request |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Expected conduct, and where to report a problem |
@@ -67,8 +69,10 @@ PS5  pathogenic  strong
   Source  Table 4, p. 8 · AVCG-2024 · https://doi.org/10.3389/fvets.2024.1497817
 ```
 
-`janook explain --list` prints all 23. If you reach for a code from the human guidelines, it will
-tell you what AVCG calls it — `BP7` here is `BP6`, and ACMG's `PP1` is `PS5`.
+`janook explain --list` prints all 23. If you type a code from the human guidelines that AVCG does
+not have, it tells you what AVCG calls it instead — ACMG/AMP's `BP7` here is `BP6`. And where AVCG
+reused a code for a new criterion, the output says so: `janook explain PP1` shows AVCG's `PP1` and
+adds a note that ACMG/AMP's `PP1` is a different criterion, AVCG's `PS5`.
 
 > **There is no installable `janook` yet.** The examples above are written as the command will be
 > once packaging exists. From a clone, `mvn clean package` and then `./scripts/janook explain PS5`,
