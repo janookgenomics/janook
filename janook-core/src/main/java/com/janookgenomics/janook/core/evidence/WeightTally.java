@@ -27,25 +27,25 @@ import java.util.Objects;
  *     PVS1} can appear here
  * @param pathogenicStrong met criteria weighing strong for pathogenicity
  * @param pathogenicModerate met criteria weighing moderate for pathogenicity
- * @param pathogenicSupporting met criteria weighing supportive for pathogenicity
+ * @param pathogenicSupportive met criteria weighing supportive for pathogenicity
  * @param benignStrong met criteria weighing strong against pathogenicity
- * @param benignSupporting met criteria weighing supportive against pathogenicity
+ * @param benignSupportive met criteria weighing supportive against pathogenicity
  */
 public record WeightTally(
         List<Criterion> pathogenicVeryStrong,
         List<Criterion> pathogenicStrong,
         List<Criterion> pathogenicModerate,
-        List<Criterion> pathogenicSupporting,
+        List<Criterion> pathogenicSupportive,
         List<Criterion> benignStrong,
-        List<Criterion> benignSupporting) {
+        List<Criterion> benignSupportive) {
 
     public WeightTally {
         pathogenicVeryStrong = List.copyOf(pathogenicVeryStrong);
         pathogenicStrong = List.copyOf(pathogenicStrong);
         pathogenicModerate = List.copyOf(pathogenicModerate);
-        pathogenicSupporting = List.copyOf(pathogenicSupporting);
+        pathogenicSupportive = List.copyOf(pathogenicSupportive);
         benignStrong = List.copyOf(benignStrong);
-        benignSupporting = List.copyOf(benignSupporting);
+        benignSupportive = List.copyOf(benignSupportive);
     }
 
     /**
@@ -64,9 +64,9 @@ public record WeightTally(
         List<Criterion> pVeryStrong = new ArrayList<>();
         List<Criterion> pStrong = new ArrayList<>();
         List<Criterion> pModerate = new ArrayList<>();
-        List<Criterion> pSupporting = new ArrayList<>();
+        List<Criterion> pSupportive = new ArrayList<>();
         List<Criterion> bStrong = new ArrayList<>();
-        List<Criterion> bSupporting = new ArrayList<>();
+        List<Criterion> bSupportive = new ArrayList<>();
 
         for (Criterion criterion : met) {
             Objects.requireNonNull(criterion, "criterion");
@@ -75,14 +75,14 @@ public record WeightTally(
                             pVeryStrong,
                             pStrong,
                             pModerate,
-                            pSupporting,
+                            pSupportive,
                             bStrong,
-                            bSupporting)
+                            bSupportive)
                     .add(criterion);
         }
 
         return new WeightTally(
-                pVeryStrong, pStrong, pModerate, pSupporting, bStrong, bSupporting);
+                pVeryStrong, pStrong, pModerate, pSupportive, bStrong, bSupportive);
     }
 
     private static List<Criterion> groupFor(
@@ -90,9 +90,9 @@ public record WeightTally(
             List<Criterion> pVeryStrong,
             List<Criterion> pStrong,
             List<Criterion> pModerate,
-            List<Criterion> pSupporting,
+            List<Criterion> pSupportive,
             List<Criterion> bStrong,
-            List<Criterion> bSupporting) {
+            List<Criterion> bSupportive) {
 
         Direction direction = criterion.direction();
         Weight weight = criterion.weight();
@@ -103,12 +103,12 @@ public record WeightTally(
                         case VERY_STRONG -> pVeryStrong;
                         case STRONG -> pStrong;
                         case MODERATE -> pModerate;
-                        case SUPPORTIVE -> pSupporting;
+                        case SUPPORTIVE -> pSupportive;
                     };
             case BENIGN ->
                     switch (weight) {
                         case STRONG -> bStrong;
-                        case SUPPORTIVE -> bSupporting;
+                        case SUPPORTIVE -> bSupportive;
                         // AVCG defines no benign very-strong or benign moderate criterion, so
                         // reaching here means a Criterion was built by hand rather than taken from
                         // an edition. Failing is better than inventing a group for it.
@@ -128,8 +128,8 @@ public record WeightTally(
         return pathogenicVeryStrong.isEmpty()
                 && pathogenicStrong.isEmpty()
                 && pathogenicModerate.isEmpty()
-                && pathogenicSupporting.isEmpty()
+                && pathogenicSupportive.isEmpty()
                 && benignStrong.isEmpty()
-                && benignSupporting.isEmpty();
+                && benignSupportive.isEmpty();
     }
 }

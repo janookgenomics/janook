@@ -56,7 +56,7 @@ esac
 if [ -z "$JAR" ]; then
   # The command jar, since it is the one that reports a version to a user.
   JAR="$(find janook-cli/target -maxdepth 1 -name 'janook-cli-*.jar' ! -name '*-sources.jar' \
-    2>/dev/null | head -1)"
+    ! -name '*-javadoc.jar' 2>/dev/null | head -1)"
   [ -n "$JAR" ] || fatal "no jar found under janook-cli/target — run 'mvn clean package' first"
 fi
 

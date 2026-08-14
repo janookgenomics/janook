@@ -14,7 +14,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, develop]
 
 permissions:
   contents: read
@@ -56,6 +56,12 @@ jobs:
   #
   # After a release or hotfix lands on main, develop has to receive it too. Forget, and the fix is
   # silently reverted by the next release, having appeared to work for weeks.
+  #
+  # This runs on pushes to develop as well as to main, on purpose. During a release, the push to
+  # main happens before the merge back into develop, so the run on main fails — that failure is
+  # the reminder. The run on the develop push that merges main back is what goes green and shows
+  # the reminder was acted on. Without the develop trigger, the red run on main would just sit
+  # there after the merge back, looking like an unresolved problem.
   merge-back-complete:
     name: main is fully contained in develop
     if: github.event_name == 'push'
@@ -67,8 +73,8 @@ jobs:
 
       - name: Check every commit on main is also on develop
         run: |
-          git fetch --quiet origin develop
-          missing=$(git rev-list origin/develop..HEAD)
+          git fetch --quiet origin main develop
+          missing=$(git rev-list origin/develop..origin/main)
           if [ -z "$missing" ]; then
             printf 'OK: every commit on main is reachable from develop.\n'
             exit 0
@@ -76,7 +82,7 @@ jobs:
           printf 'BRANCHING RULE: main contains commits that develop does not.\n' >&2
           printf '\n' >&2
           printf 'Missing from develop:\n' >&2
-          git log --oneline origin/develop..HEAD >&2
+          git log --oneline origin/develop..origin/main >&2
           printf '\n' >&2
           printf 'WHY: a release or hotfix that lands on main must be merged back into develop.\n' >&2
           printf 'Skip it and the next release silently reverts the fix — it will have appeared\n' >&2

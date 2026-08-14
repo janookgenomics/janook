@@ -11,6 +11,9 @@ name: CI
 on:
   push:
     branches: ['**']
+    # Tags too. The release-version check has rules for refs/tags/v* — the strictest ones it
+    # has — and they can only run if pushing a tag triggers CI.
+    tags: ['v*']
   pull_request:
 
 # Cancel superseded runs on the same branch; the newest push is the only one whose answer matters.

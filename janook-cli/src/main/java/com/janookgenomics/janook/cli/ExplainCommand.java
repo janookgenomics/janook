@@ -5,6 +5,7 @@ import com.janookgenomics.janook.core.criteria.AcmgOrigin;
 import com.janookgenomics.janook.core.criteria.Avcg2024;
 import com.janookgenomics.janook.core.criteria.Criterion;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -68,7 +69,7 @@ final class ExplainCommand {
                     criterion.code(),
                     criterion.direction().name().toLowerCase(Locale.ROOT),
                     criterion.weight().label(),
-                    firstSentence(criterion.definition()));
+                    preview(criterion.definition()));
         }
         return ExitStatus.OK;
     }
@@ -100,6 +101,25 @@ final class ExplainCommand {
                         + edition.identifier()
                         + " · "
                         + edition.doiUrl());
+
+        // AVCG reused this code for a criterion unrelated to ACMG/AMP's criterion of the same
+        // name. Without a pointer, a reader who knows the human guidelines will assume the two
+        // are the same thing. Today only PP1 has this problem.
+        whatAcmgCodeBecame(criterion.code())
+                .filter(acmg -> !acmg.code().equals(criterion.code()))
+                .ifPresent(
+                        acmg -> {
+                            out.println();
+                            String note =
+                                    "Note: ACMG/AMP's "
+                                            + criterion.code()
+                                            + " is a different criterion. In AVCG it is "
+                                            + acmg.code()
+                                            + ".";
+                            for (String line : wrap(note, WRAP - INDENT.length())) {
+                                out.println(INDENT + line);
+                            }
+                        });
     }
 
     /**
@@ -143,7 +163,7 @@ final class ExplainCommand {
     }
 
     private static List<String> wrap(String text, int width) {
-        List<String> lines = new java.util.ArrayList<>();
+        List<String> lines = new ArrayList<>();
         StringBuilder line = new StringBuilder();
         for (String word : text.split(" ")) {
             if (!line.isEmpty() && line.length() + 1 + word.length() > width) {
@@ -168,7 +188,7 @@ final class ExplainCommand {
      * "Null variant (nonsense" — a truncation that reads like a complete thought is worse than one
      * that obviously is not.
      */
-    private static String firstSentence(String definition) {
+    private static String preview(String definition) {
         return definition.length() <= 60 ? definition : definition.substring(0, 57) + "...";
     }
 

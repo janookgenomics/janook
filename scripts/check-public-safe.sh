@@ -53,7 +53,10 @@ if git rev-parse --verify --quiet HEAD >/dev/null; then
   report 'commit message: ' "$hits"
 fi
 
-hits=$(deny "$(git for-each-ref --format='%(refname:short)' refs/heads)") || fatal 'branch scan'
+# refs/remotes too: in CI, the checkout has only one local branch, and every other branch on the
+# repository shows up as a remote-tracking ref. Scanning only refs/heads there would check almost
+# nothing.
+hits=$(deny "$(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes)") || fatal 'branch scan'
 report 'branch name: ' "$hits"
 
 if [ "$found" -ne 0 ]; then

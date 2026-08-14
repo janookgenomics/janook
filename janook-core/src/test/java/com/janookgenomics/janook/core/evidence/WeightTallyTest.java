@@ -37,12 +37,12 @@ class WeightTallyTest {
         assertEquals(List.of(Avcg2024.PS5), tally.pathogenicStrong());
         assertEquals(1, tally.pathogenicStrong().size());
         assertEquals(List.of(), tally.pathogenicModerate());
-        assertEquals(List.of(), tally.pathogenicSupporting());
+        assertEquals(List.of(), tally.pathogenicSupportive());
 
         // BS2 was assessed and found not to apply, so it counts zero — the single easiest thing
         // to get wrong, and the reason NOT_MET is a state rather than an absence.
         assertEquals(List.of(), tally.benignStrong());
-        assertEquals(List.of(), tally.benignSupporting());
+        assertEquals(List.of(), tally.benignSupportive());
     }
 
     @Test
@@ -82,7 +82,7 @@ class WeightTallyTest {
                         .tally();
 
         assertEquals(List.of(Avcg2024.BS1, Avcg2024.BS3), tally.benignStrong());
-        assertEquals(List.of(Avcg2024.BP2), tally.benignSupporting());
+        assertEquals(List.of(Avcg2024.BP2), tally.benignSupportive());
         assertEquals(List.of(), tally.pathogenicStrong());
     }
 
@@ -96,7 +96,7 @@ class WeightTallyTest {
 
         assertTrue(tally.isEmpty());
         assertEquals(List.of(), tally.pathogenicVeryStrong());
-        assertEquals(List.of(), tally.benignSupporting());
+        assertEquals(List.of(), tally.benignSupportive());
     }
 
     @Test
@@ -116,17 +116,17 @@ class WeightTallyTest {
                 tally.pathogenicVeryStrong().size()
                         + tally.pathogenicStrong().size()
                         + tally.pathogenicModerate().size()
-                        + tally.pathogenicSupporting().size()
+                        + tally.pathogenicSupportive().size()
                         + tally.benignStrong().size()
-                        + tally.benignSupporting().size();
+                        + tally.benignSupportive().size();
 
         assertEquals(23, grouped, "a criterion was dropped or counted twice");
         assertEquals(1, tally.pathogenicVeryStrong().size(), "PVS1 is the only very strong");
         assertEquals(5, tally.pathogenicStrong().size());
         assertEquals(4, tally.pathogenicModerate().size());
-        assertEquals(4, tally.pathogenicSupporting().size());
+        assertEquals(4, tally.pathogenicSupportive().size());
         assertEquals(3, tally.benignStrong().size());
-        assertEquals(6, tally.benignSupporting().size());
+        assertEquals(6, tally.benignSupportive().size());
     }
 
     @Test
