@@ -65,11 +65,13 @@ Each has its own test suite, asserting that it fails when it should:
 ./scripts/check-release-version.test.sh
 ```
 
-Everything else is enforced inside `mvn clean verify` — a rule that can be a test should be one.
+Everything else is enforced inside `mvn clean verify` — when a rule can be enforced by a test, it
+is a test, not a separate script.
 
-**CI runs the same commands you just ran.** There are no CI-only steps. If something is worth running
-in CI it is documented here, and if it is not documented here it does not run in CI. The moment those
-diverge, a green tick stops meaning "your clone works".
+**CI runs the same commands you just ran.** There are no CI-only steps. If something is worth
+running in CI it is documented here, and if it is not documented here it does not run in CI. This
+matters because it is what makes a green CI run meaningful: it guarantees the same commands pass on
+your clone.
 
 ## The architectural rules, and why the build enforces them
 
@@ -93,11 +95,11 @@ suppress that line and say why:
 
 The reason is not machine-checked — write one anyway.
 
-Every rule carries a tripwire proving it still fires, because a rule that is silently misconfigured
-passes every build forever and is discovered on the day it was needed. The dependency rules are
-enforced by the build, so theirs are deliberately-failing projects under `janook-core/src/it`; the
-no-I/O and no-species rules are tests, so theirs are tests beside them. If you change a rule, change
-its tripwire.
+Every rule carries a tripwire proving it still fires. Without one, a rule that is silently
+misconfigured passes every build, and nobody notices until the day the rule was needed. The
+dependency rules are enforced by the build, so their tripwires are deliberately-failing projects
+under `janook-core/src/it`; the no-I/O and no-species rules are tests, so their tripwires are tests
+beside them. If you change a rule, change its tripwire.
 
 ## Branches
 

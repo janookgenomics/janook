@@ -3,20 +3,26 @@
 An open-source implementation of the **Animal Variant Classification Guidelines** (AVCG).
 
 > **Janook is the tool. AVCG is the standard.** AVCG is the published 2024 guideline for deciding
-> whether a genetic variant in an animal causes disease; Janook is software that applies it. The two
-> are kept distinct throughout — AVCG is what the field cites and searches for, Janook is what you
-> install and run.
+> whether a genetic variant in an animal causes disease. Janook is software that applies that
+> guideline. The two names are kept distinct throughout: AVCG is what the field cites and searches
+> for, and Janook is what you install and run.
 
-When someone finds a genetic variant in a dog, horse, cat or cow, the question is always the same:
-does it cause disease, or is it harmless? In 2024 a published rulebook answered *how to decide* — 23
-weighted pieces of evidence feeding a decision tree that produces one of five labels: pathogenic,
-likely pathogenic, uncertain significance, likely benign, benign.
+When someone finds a genetic variant in a dog, horse, cat or cow — a place where that animal's DNA
+differs from the reference genome for its species — the question is always the same: does it cause
+disease, or is it harmless? In 2024 a published rulebook answered how to decide. It lists 23 kinds
+of evidence, gives each one a weight, and combines them through a decision tree into one of five
+labels: pathogenic, likely pathogenic, uncertain significance, likely benign, benign.
 
-Today people apply that rulebook by hand, in spreadsheets, holding a 23-criterion weighted decision
-tree in their heads. Two qualified evaluators reach the same conclusion about **76%** of the time.
+Today people apply that rulebook by hand, in spreadsheets. In 2026 the working group behind the
+guidelines measured
+how well that works, on 150 variants classified independently by experienced geneticists. Two
+evaluators looking at the same variant chose the same label **65%** of the time. Some of that
+disagreement was honest difference of judgement about the evidence. Some of it was arithmetic: the
+study found dozens of cases where the label written down did not match the criteria the evaluator
+had ticked. Its first recommendation is that automated label-assignment tools be built.
 
-This project is the software that does the bookkeeping: you supply the evidence, it applies the rules
-identically every time and shows its work.
+This project is that software. You supply the evidence; it applies the rules the same way every
+time and shows its work.
 
 ## Status
 
@@ -25,14 +31,15 @@ the decision tree that turns evidence into a label — does not exist yet.
 
 ## Why build it
 
-- **The rulebook is new** (2024), and tooling for it is thin — while the human equivalent, ACMG/AMP,
-  has a 2026 benchmark covering 22 tools.
-- **Correctness is provable.** The authors published a reference set of 53 feline pathogenic
-  variants, each confirmed independently by three experienced geneticists, and reported how the
-  guidelines score on it. The tool can be validated against a published number rather than asserted
-  to work.
-- **The problem is documented by the field itself** — the guidelines were published alongside a
-  measurement of how inconsistently people were classifying without them.
+- **The rulebook is new** (2024), and tooling for it is thin. The human equivalent, ACMG/AMP, has a
+  2026 benchmark covering 22 tools; the animal side has nothing comparable.
+- **Correctness can be demonstrated, not just claimed.** The authors published a reference set of
+  53 feline pathogenic variants, each confirmed independently by three experienced geneticists, and
+  reported how the guidelines score on it. The tool can be run against that set and its output
+  compared with a published number.
+- **The field has documented the problem itself.** The guidelines were published together with a
+  measurement of how inconsistently people classified without them, and the 2026 follow-up measured
+  the inconsistency that remains with them.
 
 ## Docs
 
@@ -48,8 +55,9 @@ the decision tree that turns evidence into a label — does not exist yet.
 
 ## Check our work
 
-The AVCG criteria are transcribed **by hand** from Table 4 of the publication, and a transcription
-error would not be obvious in normal use — a wrong weight produces a wrong classification, silently.
+The AVCG criteria are transcribed **by hand** from Table 4 of the publication. A transcription
+error would not be obvious in normal use: a wrong weight produces a wrong classification, and
+nothing about the output would look unusual.
 
 So the encoded criteria are published in full, generated from the code that actually runs:
 **[docs/criteria/AVCG-2024.md](docs/criteria/AVCG-2024.md)**. Every row names the table and page it
@@ -78,33 +86,34 @@ adds a note that ACMG/AMP's `PP1` is a different criterion, AVCG's `PS5`.
 > once packaging exists. From a clone, `mvn clean package` and then `./scripts/janook explain PS5`,
 > which runs the jar you just built.
 
-If you find a discrepancy, please open an issue. It is a **correctness bug**, not a documentation
-one: under [docs/VERSIONING.md](docs/VERSIONING.md), changing a criterion's weight is a major
-version, because it can change a classification someone has already published.
+If you find a discrepancy, please open an issue. Treat it as a **correctness bug**, not a
+documentation problem: under [docs/VERSIONING.md](docs/VERSIONING.md), changing a criterion's
+weight is a major version, because it can change a classification someone has already published.
 
 ## Licence
 
 [Apache License 2.0](LICENSE) — permissive, with an explicit patent grant.
 
 Third-party material redistributed here is **not** covered by that licence. It is listed in
-[NOTICE](NOTICE) with its own terms and attribution — currently the AVCG paper itself, included under
-CC BY 4.0 so a reader checking whether the implementation is faithful has the specification to hand.
+[NOTICE](NOTICE) with its own terms and attribution — currently the AVCG paper itself, included
+under CC BY 4.0 so a reader checking whether the implementation is faithful has the specification
+to hand.
 
 ## Decisions so far
 
 **Java.** The field is more JVM-heavy than its reputation suggests — GATK, Picard, snpEff, IGV,
-Cromwell and Nextflow all run on it. Distribution via Bioconda pulls in a JDK automatically, so users
-never install Java themselves.
+Cromwell and Nextflow all run on it. Distribution via Bioconda pulls in a JDK automatically, so
+users never install Java themselves.
 
 **Local-first.** Researchers frequently cannot upload data to a third party. The tool runs on their
-machine against their data; a hosted version could come later, from the same codebase.
+machine against their data. A hosted version could come later, from the same codebase.
 
-**Species-agnostic engine, cat first.** The criteria and decision tree don't vary by species. The
-reference data does. Cat leads only because it's the species with a published truth set.
+**Species-agnostic engine, cat first.** The criteria and decision tree do not vary by species. The
+reference data does. Cat leads only because it is the species with a published truth set.
 
-**Open source.** Not a commercial product — a public artifact, and the foundation for a shared
-registry if it earns one.
+**Open source.** Not a commercial product. If the tool proves useful, it could become the
+foundation for a shared public registry of animal variant classifications later.
 
-**The tool is Janook; the standard is AVCG.** Those stay distinct throughout. AVCG is the published
-2024 guideline this implements and the term people will search for — it keeps its place in the prose,
-the docs and the criterion names. Janook is the thing you install and run.
+**The tool is Janook; the standard is AVCG.** The two names stay distinct throughout. AVCG is the
+published 2024 guideline this implements and the term people will search for, so it keeps its place
+in the prose, the docs and the criterion names. Janook is the thing you install and run.
