@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 #
-# A version identifies exactly one behaviour, or it identifies nothing. This check is what makes
-# that true by construction rather than by care.
+# Checks that the version the built artifact reports suits the branch or tag it was built on.
+# If a release's name and the version inside its jar can disagree, then one version number can
+# mean two different behaviours, and no stored result can be reproduced from its citation. This
+# check makes the two agree automatically, rather than depending on someone remembering.
 #
 # It reads the version out of THE BUILT JAR, not out of the pom. The pom says what the build was
 # asked to produce; the jar says what it actually produced. A filtering fault, a stale target
@@ -10,9 +12,9 @@
 #
 # What is enforced depends on where the commit lives, because the rule genuinely differs:
 #
-#   develop, feature/*      must carry -SNAPSHOT. Unreleasable work must be unmistakably so.
+#   develop, feature/*      must carry -SNAPSHOT, so unreleasable work is clearly marked as such.
 #   release/x.y.z, hotfix/  must be exactly x.y.z, no suffix. The bump happens here, before the
-#                           merge, so the tag and the artifact agree by construction.
+#                           merge, so the tag and the artifact agree from the start.
 #   main                    must not carry -SNAPSHOT. main is what was released.
 #   tag vx.y.z              must be exactly x.y.z, built from a known commit, from a clean tree.
 #
@@ -47,7 +49,8 @@ if [ -z "$REF" ]; then
     || fatal "no ref given and HEAD is detached (usage: $0 <ref> [jar])"
 fi
 
-# Accept a bare branch name as well as a full ref, so running this by hand is not a memory test.
+# Accept a bare branch name as well as a full ref, so nobody has to remember the refs/heads/ form
+# to run this by hand.
 case "$REF" in
   refs/*) ;;
   *) REF="refs/heads/$REF" ;;
@@ -107,8 +110,8 @@ require_release() {
     "Reports:  $VERSION" \
     "" \
     "WHY: the version bump belongs on the release branch, before the merge to main, so" \
-    "that the tag and the artifact agree by construction rather than by care. Drop the" \
-    "suffix there and this passes."
+    "that the tag and the artifact agree automatically rather than depending on someone" \
+    "remembering. Drop the suffix there and this passes."
 }
 
 require_exactly() {

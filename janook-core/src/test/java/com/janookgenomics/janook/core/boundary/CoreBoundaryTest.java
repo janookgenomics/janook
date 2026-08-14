@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 /**
  * The core boundary, and the proof that guarding it works.
  *
- * <p>The second test is the one that matters. An enforcement rule which is silently misconfigured
- * passes every build forever and is discovered on the day it was needed — and that risk is at its
- * highest right now, while janook-core has almost no classes and every rule would pass whether or
- * not it is wired up correctly.
+ * <p>The second test is the one that matters. An enforcement rule that is silently misconfigured
+ * passes every build, and nobody notices until the day the rule was needed — and that risk is at
+ * its highest right now, while janook-core has almost no classes and every rule would pass whether
+ * or not it is wired up correctly.
  */
 class CoreBoundaryTest {
 
@@ -31,8 +31,8 @@ class CoreBoundaryTest {
         assertTrue(
                 result.hasViolation(),
                 "The no-I/O rule reported nothing against classes that deliberately use java.io, "
-                        + "java.nio.file, java.net and java.sql. The rule is not working, which "
-                        + "means every clean build since it was added has been meaningless.");
+                        + "java.nio.file, java.net and java.sql. The rule is not working, so every "
+                        + "clean build since it was added has proven nothing.");
 
         String report = String.join("\n", result.getFailureReport().getDetails());
         for (String violator :
@@ -54,9 +54,9 @@ class CoreBoundaryTest {
 
         assertTrue(
                 description.contains("pure function from evidence to classification"),
-                "The failure report omits why the rule exists. A message that says only which class "
-                        + "broke the rule teaches nobody why the rule is there, and a rule nobody "
-                        + "understands is a rule somebody deletes.");
+                "The failure report omits why the rule exists. A message that names only the "
+                        + "breaking class teaches nobody the reason for the rule — and a rule "
+                        + "whose reason is unknown is easy to argue away and delete.");
         assertFalse(
                 description.isBlank(), "The failure report is empty, so nothing would be printed.");
     }

@@ -88,8 +88,8 @@ class CriteriaReferenceTest {
     void referenceCarriesTheCandidNote() {
         String rendered = CriteriaReference.render();
 
-        // The candour is the point of publishing the file at all. If someone trims this later, the
-        // file becomes an unqualified claim of correctness, which is not what it is.
+        // The candid note is the reason the file is published at all. If someone trims it later,
+        // the file becomes an unqualified claim of correctness, which is not what it is.
         assertTrue(rendered.contains("transcribed by hand"));
         assertTrue(rendered.contains("open an issue"));
         assertTrue(rendered.contains("correctness bug"));

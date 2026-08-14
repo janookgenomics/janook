@@ -32,7 +32,7 @@
     overwrites both when a repository is present.
 
     Without these, filtering would leave the literal ${git.commit.id.abbrev} in the packaged
-    resource and the command would print it at somebody recording provenance.
+    resource, and the command would print that placeholder to somebody recording provenance.
   -->
   <properties>
     <git.commit.id.abbrev>unknown</git.commit.id.abbrev>
@@ -59,8 +59,8 @@
       violates Apache-2.0 section 4, and nothing would fail to tell us.
 
       Two entries cover src/main/resources because filtering is per-directory, not per-file: the
-      version properties file must be filtered, and everything else must not — a filtered binary
-      resource is a corrupted one, and that lesson is cheaper learned here than later.
+      version properties file must be filtered, and everything else must not, because filtering a
+      binary resource corrupts it.
     -->
     <resources>
       <resource>

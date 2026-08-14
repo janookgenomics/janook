@@ -59,8 +59,8 @@
 
       <!--
         The tripwires. Each project under src/it violates exactly one boundary rule and is asserted
-        to fail, because an enforcement rule that is silently misconfigured passes every build
-        forever and is discovered on the day it was needed.
+        to fail. Without them, a rule that is silently misconfigured passes every build, and nobody
+        notices until the day the rule was needed.
 
         The dependency rules only. The no-I/O and no-species rules carry their own tripwires as
         ordinary tests, which is cheaper — a whole Maven sub-build is the price of proving that
