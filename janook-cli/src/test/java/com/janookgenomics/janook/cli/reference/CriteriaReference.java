@@ -3,6 +3,7 @@ package com.janookgenomics.janook.cli.reference;
 import com.janookgenomics.janook.core.GuidelineEdition;
 import com.janookgenomics.janook.core.criteria.Avcg2024;
 import com.janookgenomics.janook.core.criteria.Criterion;
+import java.util.Locale;
 
 /**
  * Renders the criteria Janook has encoded as Markdown, for review against the paper.
@@ -66,7 +67,7 @@ final class CriteriaReference {
             out.append("| `")
                     .append(criterion.code())
                     .append("` | ")
-                    .append(criterion.direction().name().toLowerCase())
+                    .append(criterion.direction().name().toLowerCase(Locale.ROOT))
                     .append(" | ")
                     .append(criterion.weight().label())
                     .append(" | ")

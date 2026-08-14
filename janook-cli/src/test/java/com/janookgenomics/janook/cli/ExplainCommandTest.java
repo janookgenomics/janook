@@ -96,13 +96,25 @@ class ExplainCommandTest {
     }
 
     @Test
-    @DisplayName("ACMG PP1 resolves to PS5, the reweighted rename")
-    void acmgPp1ResolvesToPs5() {
-        // PP1 exists in AVCG as something else entirely, so this one cannot be answered by the
-        // miss path — it succeeds, and reports AVCG's PP1.
+    @DisplayName("explaining AVCG's PP1 also says where ACMG's PP1 went")
+    void avcgPp1PointsAtAcmgPp1sNewHome() {
+        // PP1 exists in AVCG as something else entirely, so typing it succeeds and reports AVCG's
+        // PP1 — but a reader who knows the human guidelines expects the cosegregation criterion,
+        // which AVCG renamed to PS5. The output has to say so, or that reader walks away with the
+        // wrong criterion and no warning.
         assertEquals(0, run("explain", "PP1"));
         assertTrue(stdout().startsWith("PP1  pathogenic  supportive"));
         assertTrue(stdout().contains("new in AVCG"), "the trap is that this is not ACMG's PP1");
+        assertTrue(
+                stdout().contains("ACMG/AMP's PP1 is a different criterion. In AVCG it is PS5."),
+                stdout());
+    }
+
+    @Test
+    @DisplayName("the note about a reused code appears only where a code was actually reused")
+    void reusedCodeNoteOnlyWhereItApplies() {
+        run("explain", "PS5");
+        assertFalse(stdout().contains("Note:"), "PS5's code was not reused; nothing to warn about");
     }
 
     @Test
