@@ -10,10 +10,14 @@ package com.janookgenomics.janook.core.decision;
  * not among them — so the likelier explanation is a symbol dropped in typesetting, not a silent
  * tightening of a combining rule.
  *
- * <p>Read literally, the count also produces an effect nobody designs on purpose: with one strong
- * and one moderate criterion met, exactly four supporting criteria make a variant Pathogenic,
- * while a <em>fifth</em> supporting criterion — more evidence in the same direction — would demote
- * it to Likely Pathogenic. That anomaly is why {@link Reading#AT_LEAST} is in force.
+ * <p>Read literally, the rule's text also implies an effect nobody designs on purpose: with one
+ * strong and one moderate criterion met, exactly four supporting criteria would make a variant
+ * Pathogenic, while a <em>fifth</em> supporting criterion — more evidence in the same direction —
+ * would demote it to Likely Pathogenic. In this edition that case cannot actually arise: only four
+ * supportive pathogenic criteria exist ({@code PP1}–{@code PP4}), so no reachable tally
+ * distinguishes the two readings, and the choice records which transcription of the rule is in
+ * force rather than a behavioural difference. It would start mattering in an edition with more
+ * than four supportive criteria.
  *
  * <p><strong>The choice is provisional, and this constant is the one place it lives.</strong> The
  * guideline's authors have been asked which reading is intended. When the answer arrives — or when
