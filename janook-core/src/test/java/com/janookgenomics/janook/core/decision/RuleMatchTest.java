@@ -8,6 +8,7 @@ import com.janookgenomics.janook.core.criteria.Avcg2024;
 import com.janookgenomics.janook.core.criteria.Criterion;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +23,39 @@ class RuleMatchTest {
         assertEquals(Label.BENIGN, match.label());
         assertEquals("B", match.rule());
         assertEquals(List.of(Avcg2024.BS1, Avcg2024.BS2), match.criteria());
+    }
+
+    @Test
+    @DisplayName("a rule with alternative clauses records which one was satisfied")
+    void carriesTheClauseWhereARuleHasOne() {
+        RuleMatch match =
+                new RuleMatch(
+                        Label.PATHOGENIC,
+                        "P.i",
+                        Optional.of("≥1 strong"),
+                        List.of(Avcg2024.PVS1, Avcg2024.PS5));
+
+        assertEquals(Optional.of("≥1 strong"), match.clause());
+    }
+
+    @Test
+    @DisplayName("a rule with no alternatives carries no clause")
+    void carriesNoClauseWhereARuleHasNone() {
+        // Branch B's rules each have exactly one way to be satisfied, so "which alternative" is
+        // not a question their matches answer.
+        RuleMatch match = new RuleMatch(Label.BENIGN, "B", List.of(Avcg2024.BS1, Avcg2024.BS2));
+
+        assertEquals(Optional.empty(), match.clause());
+    }
+
+    @Test
+    @DisplayName("a blank clause is refused — omit it instead")
+    void blankClauseIsRefused() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        new RuleMatch(
+                                Label.PATHOGENIC, "P.i", Optional.of(" "), List.of(Avcg2024.PVS1)));
     }
 
     @Test
@@ -70,6 +104,9 @@ class RuleMatchTest {
                 NullPointerException.class,
                 () -> new RuleMatch(Label.BENIGN, null, List.of(Avcg2024.BS1)));
         assertThrows(NullPointerException.class, () -> new RuleMatch(Label.BENIGN, "B", null));
+        assertThrows(
+                NullPointerException.class,
+                () -> new RuleMatch(Label.BENIGN, "B", null, List.of(Avcg2024.BS1)));
     }
 
     @Test
