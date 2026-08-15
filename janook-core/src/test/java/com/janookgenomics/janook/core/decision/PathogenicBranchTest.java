@@ -104,8 +104,8 @@ class PathogenicBranchTest {
     @Test
     @DisplayName("very strong alone is no label from this branch")
     void veryStrongAloneIsNoLabel() {
-        // PVS1 with one moderate is Likely Pathogenic under LP.i, which is the next story. Until
-        // the LP rules exist, everything short of a P rule gets nothing from this branch.
+        // The strongest single criterion there is still satisfies no rule on its own — LP.i needs
+        // a moderate criterion beside it. Table 6 leaves this uncertain, and so does the branch.
         assertTrue(PathogenicBranch.evaluate(tallyOf(Avcg2024.PVS1)).isEmpty());
     }
 
@@ -217,13 +217,154 @@ class PathogenicBranchTest {
     }
 
     @Test
-    @DisplayName("evidence below every P rule is no label, not a lesser one")
+    @DisplayName("LP.i: very strong and one moderate is Likely Pathogenic")
+    void veryStrongPlusOneModerate() {
+        RuleMatch match =
+                PathogenicBranch.evaluate(tallyOf(Avcg2024.PVS1, Avcg2024.PM1)).orElseThrow();
+
+        assertEquals(Label.LIKELY_PATHOGENIC, match.label());
+        assertEquals("LP.i", match.rule());
+        assertEquals(Optional.empty(), match.clause());
+        assertEquals(List.of(Avcg2024.PVS1, Avcg2024.PM1), match.criteria());
+    }
+
+    @Test
+    @DisplayName("Likely Pathogenic is reached only by failing every Pathogenic rule")
+    void pathogenicWinsOverLikelyPathogenic() {
+        // PVS1 with one moderate and one supporting satisfies both P.i's third clause and LP.i.
+        // The fall-through must answer P.i — Likely Pathogenic is only reachable by failing
+        // Pathogenic first, and nothing extra is implemented to make that so.
+        RuleMatch match =
+                PathogenicBranch.evaluate(tallyOf(Avcg2024.PVS1, Avcg2024.PM1, Avcg2024.PP1))
+                        .orElseThrow();
+
+        assertEquals(Label.PATHOGENIC, match.label());
+        assertEquals("P.i", match.rule());
+        assertEquals(Optional.of("1 moderate and 1 supporting"), match.clause());
+    }
+
+    @Test
+    @DisplayName("LP.ii: one strong and one moderate")
+    void oneStrongOneModerate() {
+        RuleMatch match =
+                PathogenicBranch.evaluate(tallyOf(Avcg2024.PS1, Avcg2024.PM1)).orElseThrow();
+
+        assertEquals(Label.LIKELY_PATHOGENIC, match.label());
+        assertEquals("LP.ii", match.rule());
+        assertEquals(List.of(Avcg2024.PS1, Avcg2024.PM1), match.criteria());
+    }
+
+    @Test
+    @DisplayName("LP.ii: one strong and two moderate — the top of the printed range")
+    void oneStrongTwoModerate() {
+        RuleMatch match =
+                PathogenicBranch.evaluate(tallyOf(Avcg2024.PS1, Avcg2024.PM1, Avcg2024.PM2))
+                        .orElseThrow();
+
+        assertEquals("LP.ii", match.rule());
+        assertEquals(List.of(Avcg2024.PS1, Avcg2024.PM1, Avcg2024.PM2), match.criteria());
+    }
+
+    @Test
+    @DisplayName("LP rules are checked in table order: LP.ii is named ahead of LP.iii")
+    void lpRuleOrderDecidesTheName() {
+        // One strong, one moderate, two supporting satisfies both LP.ii and LP.iii (and no P
+        // rule — P.iii's disputed clause needs four supporting). The order decides the name; the
+        // supporting criteria go unnamed because they did not participate in LP.ii.
+        RuleMatch match =
+                PathogenicBranch.evaluate(
+                                tallyOf(Avcg2024.PS1, Avcg2024.PM1, Avcg2024.PP1, Avcg2024.PP2))
+                        .orElseThrow();
+
+        assertEquals("LP.ii", match.rule());
+        assertEquals(List.of(Avcg2024.PS1, Avcg2024.PM1), match.criteria());
+    }
+
+    @Test
+    @DisplayName("LP.iii: one strong and two supporting, with no moderate")
+    void oneStrongTwoSupporting() {
+        RuleMatch match =
+                PathogenicBranch.evaluate(tallyOf(Avcg2024.PS2, Avcg2024.PP1, Avcg2024.PP2))
+                        .orElseThrow();
+
+        assertEquals("LP.iii", match.rule());
+        assertEquals(List.of(Avcg2024.PS2, Avcg2024.PP1, Avcg2024.PP2), match.criteria());
+    }
+
+    @Test
+    @DisplayName("LP.iv: three moderate criteria alone are Likely Pathogenic")
+    void threeModerateAlone() {
+        RuleMatch match =
+                PathogenicBranch.evaluate(tallyOf(Avcg2024.PM1, Avcg2024.PM2, Avcg2024.PM3))
+                        .orElseThrow();
+
+        assertEquals(Label.LIKELY_PATHOGENIC, match.label());
+        assertEquals("LP.iv", match.rule());
+        assertEquals(List.of(Avcg2024.PM1, Avcg2024.PM2, Avcg2024.PM3), match.criteria());
+    }
+
+    @Test
+    @DisplayName("LP.iv at four moderate — the case the disputed reading decides")
+    void fourModerateAlone() {
+        // THE test that flips with DisputedCount.LP_IV_THREE_MODERATE. Under the at-least reading
+        // in force, all four moderate criteria are Likely Pathogenic. Under the literal reading
+        // this tally would match no rule in either branch and finish as uncertain significance —
+        // while three moderates were enough for a label. If the guideline's authors answer that
+        // the printed count is intentional, this expectation changes to isEmpty() alongside the
+        // constant.
+        RuleMatch match =
+                PathogenicBranch.evaluate(
+                                tallyOf(Avcg2024.PM1, Avcg2024.PM2, Avcg2024.PM3, Avcg2024.PM4))
+                        .orElseThrow();
+
+        assertEquals("LP.iv", match.rule());
+        assertEquals(
+                List.of(Avcg2024.PM1, Avcg2024.PM2, Avcg2024.PM3, Avcg2024.PM4),
+                match.criteria());
+    }
+
+    @Test
+    @DisplayName("LP.v: two moderate and two supporting")
+    void twoModerateTwoSupporting() {
+        RuleMatch match =
+                PathogenicBranch.evaluate(
+                                tallyOf(Avcg2024.PM1, Avcg2024.PM2, Avcg2024.PP1, Avcg2024.PP2))
+                        .orElseThrow();
+
+        assertEquals("LP.v", match.rule());
+        assertEquals(
+                List.of(Avcg2024.PM1, Avcg2024.PM2, Avcg2024.PP1, Avcg2024.PP2),
+                match.criteria());
+    }
+
+    @Test
+    @DisplayName("LP.vi: one moderate and four supporting")
+    void oneModerateFourSupporting() {
+        RuleMatch match =
+                PathogenicBranch.evaluate(
+                                tallyOf(
+                                        Avcg2024.PM1,
+                                        Avcg2024.PP1,
+                                        Avcg2024.PP2,
+                                        Avcg2024.PP3,
+                                        Avcg2024.PP4))
+                        .orElseThrow();
+
+        assertEquals("LP.vi", match.rule());
+        assertEquals(
+                List.of(Avcg2024.PM1, Avcg2024.PP1, Avcg2024.PP2, Avcg2024.PP3, Avcg2024.PP4),
+                match.criteria());
+    }
+
+    @Test
+    @DisplayName("evidence below every rule is no label, not a lesser one")
     void belowEveryRuleIsNoLabel() {
-        // One strong, one moderate, one supporting satisfies no P rule. It will be Likely
-        // Pathogenic once the LP rules exist; today the branch must say nothing rather than guess.
-        assertTrue(
-                PathogenicBranch.evaluate(tallyOf(Avcg2024.PS1, Avcg2024.PM1, Avcg2024.PP1))
-                        .isEmpty());
+        // One strong alone, one supporting alone, and two supporting with nothing else all
+        // satisfy no rule in this branch — note the contrast with branch B, where two supporting
+        // criteria suffice for Likely Benign.
+        assertTrue(PathogenicBranch.evaluate(tallyOf(Avcg2024.PS1)).isEmpty());
+        assertTrue(PathogenicBranch.evaluate(tallyOf(Avcg2024.PP1)).isEmpty());
+        assertTrue(PathogenicBranch.evaluate(tallyOf(Avcg2024.PP1, Avcg2024.PP2)).isEmpty());
     }
 
     @Test

@@ -10,22 +10,25 @@ import java.util.stream.Stream;
 /**
  * Branch A of Table 6: does the evidence say the variant is pathogenic?
  *
- * <p>Today this is the branch's Pathogenic half — rules P.i, P.ii and P.iii, evaluated in the
- * table's order. The Likely Pathogenic rules arrive next and will be reachable only when no
- * Pathogenic rule was satisfied, the same fall-through shape branch B uses. Until then, a tally
- * that satisfies no P rule gets nothing from this branch, including tallies that will later be
- * Likely Pathogenic.
+ * <p>Three Pathogenic rules (P.i–P.iii), then six Likely Pathogenic rules (LP.i–LP.vi), evaluated
+ * in the table's order. The Likely Pathogenic rules are reached only when no Pathogenic rule was
+ * satisfied — the shape of the chain, not a written precedence, the same way branch B falls from
+ * Benign to Likely Benign. When no rule at all is satisfied the branch reports nothing: whether
+ * that means uncertain significance is the joining step's decision, made after branch B has also
+ * been heard.
  *
  * <p>Rules and their clauses are checked in the order the table prints them, and the first match
  * wins. Where the rule sets overlap — {@code PVS1} plus two strong satisfies both P.i and P.ii —
- * the order decides only which rule the decision path names; the label is Pathogenic either way.
+ * the order decides only which rule the decision path names; the label is the same either way.
+ * Only the Pathogenic rules have alternative clauses; LP.ii's "1-2 moderate" is a range within one
+ * rule, not alternatives, so the Likely Pathogenic matches carry no clause.
  *
- * <p><strong>Counts are implemented exactly as printed, with one recorded exception.</strong> The
- * clauses that print a bare number ("1 moderate and 1 supporting") are exact matches, and that
- * leaves no gap: any tally exceeding an exact clause is caught by a neighbouring "≥" clause of the
- * same rule, so the only effect of the literal reading is which clause is named. The exception is
- * P.iii's "1 moderate and 4 supporting", the table's one genuinely disputed count — its comparison
- * lives in {@link DisputedCount}, not here.
+ * <p><strong>Counts are implemented exactly as printed, with two recorded exceptions.</strong> The
+ * clauses and rules that print a bare number ("1 moderate and 1 supporting", "1 strong") are exact
+ * matches, and that leaves no gap: any tally exceeding an exact count is caught by a neighbouring
+ * "≥" clause or an earlier rule. The exceptions are the table's two genuinely disputed counts —
+ * P.iii's "4 supporting" and LP.iv's "3 moderate" — whose comparisons live in
+ * {@link DisputedCount}, not here.
  */
 public final class PathogenicBranch {
 
@@ -39,7 +42,8 @@ public final class PathogenicBranch {
         Objects.requireNonNull(tally, "tally");
         return pathogenicI(tally)
                 .or(() -> pathogenicII(tally))
-                .or(() -> pathogenicIII(tally));
+                .or(() -> pathogenicIII(tally))
+                .or(() -> likelyPathogenic(tally));
     }
 
     /**
@@ -122,6 +126,57 @@ public final class PathogenicBranch {
                     tally.pathogenicSupportive());
         }
         return Optional.empty();
+    }
+
+    /**
+     * LP.i through LP.vi, in the table's order. Each count is exact as printed, and each exact
+     * count is gap-free because an earlier rule claims anything above it: {@code PVS1} with two or
+     * more moderate is P.i, one strong with three or more moderate is P.iii, three or more
+     * moderate is LP.iv. The exception is LP.iv itself, the disputed count with real stakes —
+     * four moderates are reachable, and {@link DisputedCount} decides whether they land here or
+     * nowhere.
+     */
+    private static Optional<RuleMatch> likelyPathogenic(WeightTally tally) {
+        List<Criterion> veryStrong = tally.pathogenicVeryStrong();
+        List<Criterion> strong = tally.pathogenicStrong();
+        List<Criterion> moderate = tally.pathogenicModerate();
+        List<Criterion> supportive = tally.pathogenicSupportive();
+
+        // LP.i: very strong and 1 moderate.
+        if (!veryStrong.isEmpty() && moderate.size() == 1) {
+            return likely("LP.i", veryStrong, moderate);
+        }
+        // LP.ii: 1 strong and 1-2 moderate. The range is one rule, not alternative clauses.
+        if (strong.size() == 1 && (moderate.size() == 1 || moderate.size() == 2)) {
+            return likely("LP.ii", strong, moderate);
+        }
+        // LP.iii: 1 strong and ≥2 supporting.
+        if (strong.size() == 1 && supportive.size() >= 2) {
+            return likely("LP.iii", strong, supportive);
+        }
+        // LP.iv: 3 moderate.
+        if (DisputedCount.satisfied(
+                moderate.size(), 3, DisputedCount.LP_IV_THREE_MODERATE)) {
+            return likely("LP.iv", moderate);
+        }
+        // LP.v: 2 moderate and ≥2 supporting.
+        if (moderate.size() == 2 && supportive.size() >= 2) {
+            return likely("LP.v", moderate, supportive);
+        }
+        // LP.vi: 1 moderate and ≥4 supporting.
+        if (moderate.size() == 1 && supportive.size() >= 4) {
+            return likely("LP.vi", moderate, supportive);
+        }
+        return Optional.empty();
+    }
+
+    @SafeVarargs
+    private static Optional<RuleMatch> likely(String rule, List<Criterion>... groups) {
+        return Optional.of(
+                new RuleMatch(
+                        Label.LIKELY_PATHOGENIC,
+                        rule,
+                        Stream.of(groups).flatMap(List::stream).toList()));
     }
 
     @SafeVarargs
