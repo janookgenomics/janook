@@ -12,12 +12,25 @@ class DisputedCountTest {
 
     @Test
     @DisplayName("the reading in force for P.iii's \"4 supporting\" is at-least, provisionally")
-    void theReadingInForce() {
+    void theReadingInForceForPIII() {
         // This assertion is the record of a decision, not a tautology. If the guideline's authors
         // answer that the printed count is intentional, flip the constant and this expectation
         // together — that pair of edits is the entire change, and this test failing on its own is
         // what stops the constant being flipped casually.
         assertEquals(Reading.AT_LEAST, DisputedCount.P_III_FOUR_SUPPORTING);
+    }
+
+    @Test
+    @DisplayName("the reading in force for LP.iv's \"3 moderate\" is at-least, provisionally")
+    void theReadingInForceForLPIV() {
+        // Same record-of-a-decision as P.iii's, but this is the one with behavioural stakes: four
+        // moderates are reachable, and the readings disagree about them. Under at-least they are
+        // Likely Pathogenic; read literally they match no rule and finish uncertain. Flipping this
+        // constant changes classifications.
+        assertEquals(Reading.AT_LEAST, DisputedCount.LP_IV_THREE_MODERATE);
+
+        assertTrue(DisputedCount.satisfied(4, 3, Reading.AT_LEAST));
+        assertFalse(DisputedCount.satisfied(4, 3, Reading.EXACTLY_AS_PRINTED));
     }
 
     @Test
