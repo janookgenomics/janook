@@ -98,10 +98,12 @@ weight is a major version, because it can change a classification someone has al
 
 Janook implements AVCG; it is not an authority on AVCG.
 
-Janook was built from a software engineering perspective, and we welcome review from veterinary
-geneticists, researchers, and bioinformaticians. Every criterion points back to the relevant table
-and page in the AVCG paper. Where the guidelines leave room for interpretation, Janook tries to
-make that visible rather than hide it in the code.
+Janook was built from a software engineering perspective, with AI-assisted design and
+implementation under human review. We welcome review from veterinary geneticists, researchers, and
+bioinformaticians.
+
+Every criterion points back to the relevant table and page in the AVCG paper. Where the guidelines
+leave room for interpretation, Janook tries to make that visible rather than hide it in the code.
 
 If something in Janook does not match your reading of AVCG, please open an issue. Scientific
 corrections are especially welcome.
