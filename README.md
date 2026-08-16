@@ -26,19 +26,22 @@ time and shows its work.
 
 ## Why this project?
 
-I've spent many years working in software, including several years around biotech and human
-genetics. Along the way, I've benefited from a huge amount of open-source software built and
-shared by researchers, bioinformaticians, and software engineers.
+I've spent most of my career building software, including several years working around biotech
+and human genetics. Along the way, I've benefited from a huge amount of open-source software built
+and shared by researchers, bioinformaticians, and software engineers.
 
 After decades of mostly being a consumer of open source, I wanted to contribute something back,
-even if small.
+even if small. I started looking for a useful problem where software could help and where an
+open-source implementation didn't already exist.
 
-I started looking for a useful problem where software could help and where an open-source
-implementation didn't already exist. Human genetics already has an impressive ecosystem of mature
-tools. Animal variant classification looked different: AVCG is a relatively new standard, and I
-couldn't find an open-source implementation of it.
+Human genetics already has an impressive ecosystem of mature tools. Animal variant classification
+looked different. AVCG is relatively new, and I couldn't find an open-source implementation of the
+guidelines. Janook started from that gap.
 
-Janook started from that gap.
+Janook is written in Java for a simple reason: it's the language I've spent most of my career
+working with. I could have picked Python, Go, Rust, or something else, but I know Java well and
+can be more productive in it. For an open-source project I'm building in my own time, that seemed
+like the right tradeoff.
 
 ## Status
 
