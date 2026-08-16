@@ -83,8 +83,8 @@ jobs:
         # Two builds of the same commit must produce byte-identical artifacts, or the checksum a
         # release publishes identifies nothing.
         run: |
-          first=$(shasum -a 256 janook-cli/target/janook-cli-*-dist.tar.gz | cut -d' ' -f1)
+          first=$(shasum -a 256 janook-cli/target/janook-*-dist.tar.gz | cut -d' ' -f1)
           mvn -q clean package
-          second=$(shasum -a 256 janook-cli/target/janook-cli-*-dist.tar.gz | cut -d' ' -f1)
+          second=$(shasum -a 256 janook-cli/target/janook-*-dist.tar.gz | cut -d' ' -f1)
           [ "$first" = "$second" ] || { echo "artifact is not reproducible: $first vs $second"; exit 1; }
           echo "reproducible: $first"
