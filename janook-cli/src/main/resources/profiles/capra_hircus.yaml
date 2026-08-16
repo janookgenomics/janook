@@ -1,0 +1,10 @@
+# A stub: real species facts, and no predictors because none have been validated for this
+# species — the paper's benchmark covered the cat only.
+species: capra_hircus
+display_name: goat
+assembly: ARS1
+annotation: Ensembl 116
+omia_species: 9925
+predictors:
+  missense: []
+  splice: []
