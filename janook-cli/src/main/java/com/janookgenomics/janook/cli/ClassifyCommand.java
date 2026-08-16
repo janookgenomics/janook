@@ -44,7 +44,9 @@ final class ClassifyCommand {
     private enum Artifact {
         SUMMARY,
         JSON,
-        REPORT
+        REPORT,
+        BRIEF,
+        BRIEF_JSON
     }
 
     /** Runs with the arguments after {@code classify}. */
@@ -53,6 +55,7 @@ final class ClassifyCommand {
         boolean batch = false;
         boolean json = false;
         boolean report = false;
+        boolean brief = false;
         Optional<String> operator = Optional.empty();
 
         for (int i = 0; i < args.length; i++) {
@@ -60,6 +63,7 @@ final class ClassifyCommand {
                 case "--batch" -> batch = true;
                 case "--json" -> json = true;
                 case "--report" -> report = true;
+                case "--brief" -> brief = true;
                 case "--operator" -> {
                     if (i + 1 >= args.length || args[i + 1].isBlank()) {
                         return usage(err);
@@ -74,7 +78,9 @@ final class ClassifyCommand {
                 }
             }
         }
-        if (file == null || (json && report) || (batch && report)) {
+        // --brief and --report contradict each other, and --brief with --batch is redundant:
+        // the batch output is already one line per variant.
+        if (file == null || (json && report) || (batch && report) || (brief && (report || batch))) {
             return usage(err);
         }
 
@@ -88,7 +94,10 @@ final class ClassifyCommand {
 
         Provenance provenance =
                 new Provenance(ToolVersion.read(), hash(bytes), LocalDate.now(), operator);
-        Artifact artifact = json ? Artifact.JSON : report ? Artifact.REPORT : Artifact.SUMMARY;
+        Artifact artifact =
+                brief
+                        ? (json ? Artifact.BRIEF_JSON : Artifact.BRIEF)
+                        : json ? Artifact.JSON : report ? Artifact.REPORT : Artifact.SUMMARY;
 
         try {
             String content = new String(bytes, StandardCharsets.UTF_8);
@@ -113,8 +122,29 @@ final class ClassifyCommand {
                     case SUMMARY -> TerminalSummary.render(record);
                     case JSON -> JsonReport.render(record);
                     case REPORT -> MarkdownReport.render(record);
+                    case BRIEF -> briefLine(record.classification());
+                    case BRIEF_JSON -> briefJson(record.classification());
                 });
         return ExitStatus.OK;
+    }
+
+    /** The answer and nothing else — with the uncertain routes still kept apart, as everywhere. */
+    private static String briefLine(Classification classification) {
+        String line = "CLASSIFICATION: " + classification.label().name().replace('_', ' ');
+        return switch (classification.reason()) {
+            case ONE_BRANCH_LABELLED -> line + "\n";
+            case NOT_ENOUGH_CRITERIA -> line + " — not enough criteria were met\n";
+            case CONFLICTING_BRANCHES -> line + " — the evidence contradicts itself\n";
+        };
+    }
+
+    /** The minimal machine form: the label and the reason, both as the full document spells them. */
+    private static String briefJson(Classification classification) {
+        return "{\"label\": \""
+                + classification.label().name()
+                + "\", \"reason\": \""
+                + classification.reason().name()
+                + "\"}\n";
     }
 
     private static int classifyBatch(
