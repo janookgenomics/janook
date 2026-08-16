@@ -46,6 +46,15 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!--
+      Makes builds reproducible: the jar and assembly plugins stamp every archive entry with this
+      fixed instant instead of the wall clock, so two builds of the same commit produce
+      byte-identical artifacts. That is what makes the checksum in a release, and in the Bioconda
+      recipe that pins it, meaningful. The real build time is not lost - the build commit in
+      janook-version.properties is the provenance that matters.
+    -->
+    <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
+
+    <!--
       Java 25 is the source, target and release level, not merely the JDK that builds the project.
       See docs/PLAN.md § Toolchain — this is a settled decision, not a build detail.
     -->
@@ -56,6 +65,7 @@
     <snakeyaml.version>2.6</snakeyaml.version>
 
     <git-commit-id-maven-plugin.version>9.0.2</git-commit-id-maven-plugin.version>
+    <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
@@ -159,6 +169,11 @@
           <version>${git-commit-id-maven-plugin.version}</version>
         </plugin>
 
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The release artifact: janook-<version>-dist.tar.gz, unpacking to janook-<version>/ with
+  bin/janook, the jar and its dependencies under lib/, and LICENSE and NOTICE at the root where
+  Apache-2.0 section 4 wants them visible.
+-->
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
+
+  <id>dist</id>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+  <baseDirectory>janook-${project.version}</baseDirectory>
+
+  <files>
+    <!--
+      The command jar sits at the archive root with its dependencies under lib/ — the same layout
+      as target/, which matters: the jar's Class-Path manifest names lib/ relative to the jar's
+      own directory, so moving the jar into lib/ would break it as lib/lib/.
+    -->
+    <file>
+      <source>${project.build.directory}/${project.build.finalName}.jar</source>
+      <outputDirectory>.</outputDirectory>
+    </file>
+    <file>
+      <source>src/main/dist/janook</source>
+      <outputDirectory>bin</outputDirectory>
+      <fileMode>0755</fileMode>
+    </file>
+    <file>
+      <source>../LICENSE</source>
+      <outputDirectory>.</outputDirectory>
+    </file>
+    <file>
+      <source>../NOTICE</source>
+      <outputDirectory>.</outputDirectory>
+    </file>
+  </files>
+
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}/lib</directory>
+      <outputDirectory>lib</outputDirectory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>

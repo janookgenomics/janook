@@ -47,16 +47,21 @@ not exist yet. Docs elsewhere write examples as plain `janook ...` because that 
 
 ## Run the checks
 
-Two shell checks run alongside the build, and CI runs exactly these:
+Three shell checks run alongside the build, and CI runs exactly these:
 
 ```sh
 ./scripts/check-public-safe.sh          # nothing unpublishable has been committed
 ./scripts/check-release-version.sh      # the jar's version suits the branch it was built on
+./scripts/check-dist.sh                 # the release archive works when unpacked and run
 ```
 
 The second reads the version out of the built jar, so run it after `mvn clean verify`. It takes a
 ref if you want to ask a different question — `./scripts/check-release-version.sh refs/tags/v9.1.0`
 answers "would this be a valid release?" without creating the tag.
+
+The third unpacks the release archive the build produced and runs the real commands through the
+shipped launcher — version, explain, init, and a classification of init's own template — checking
+the exit codes on the way. It exists because passing tests do not prove the built artifact works.
 
 Each has its own test suite, asserting that it fails when it should:
 

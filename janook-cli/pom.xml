@@ -184,6 +184,31 @@
           </execution>
         </executions>
       </plugin>
+
+      <!--
+        The release artifact: one archive carrying the jar, its lib directory, the shipped
+        launcher, LICENSE and NOTICE. An archive rather than a shaded jar, deliberately — the
+        layout inside is exactly the layout every test runs against. See docs/DECISIONS.md.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>release-artifact</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/assembly/dist.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>posix</tarLongFileMode>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

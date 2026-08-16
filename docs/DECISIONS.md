@@ -9,6 +9,35 @@ Each entry says what was decided, why, and what it costs. Newest first.
 
 ---
 
+## The release artifact is an archive, not a shaded jar
+
+**Decided:** 2026-08-16 · **Affects:** `janook-cli/pom.xml`, `janook-cli/src/assembly/dist.xml`,
+`janook-cli/src/main/dist/janook`
+
+The release ships one `janook-<version>-dist.tar.gz`, unpacking to a directory with the command
+jar at its root, dependencies under `lib/`, the `janook` launcher under `bin/`, and LICENSE and
+NOTICE visible at the top. Not a single shaded jar, for three reasons:
+
+- **The layout inside the archive is exactly the layout every test runs against** — the jar and
+  its `Class-Path` manifest, unchanged. Shading rewrites the jar and merges its contents, which
+  would make the released artifact the one build nobody had tested the internals of.
+- Shading needs merge rules for files that exist in every jar — each of ours carries its own
+  `META-INF/LICENSE` and `NOTICE` — and a merge rule is a thing that silently goes stale.
+- An archive carries LICENSE and NOTICE at its root where Apache-2.0 section 4 wants them seen,
+  and matches how comparable tools ship through Bioconda.
+
+**What it costs.** An install is a directory, not one file, and the launcher is what hides that.
+The jar sits at the archive root rather than tidily in `lib/`, because `Class-Path` entries
+resolve relative to the jar's own directory — moving it would break resolution as `lib/lib/`.
+
+Builds are reproducible: `project.build.outputTimestamp` in the parent pom pins archive entry
+times, so two builds of the same commit produce byte-identical artifacts, and the checksum a
+release publishes — and a Bioconda recipe pins — identifies exactly one build.
+`scripts/check-dist.sh` verifies the artifact by using it: unpack, then run the real commands
+through the shipped launcher, including the exit-code contract.
+
+---
+
 ## The build stamp shells out to git rather than using JGit
 
 **Decided:** 2026-08-11 · **Affects:** `janook-cli/pom.xml`, `git-commit-id-maven-plugin`
