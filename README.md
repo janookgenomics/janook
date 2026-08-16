@@ -48,9 +48,10 @@ like the right tradeoff.
 Early development. The 23 criteria are encoded, `janook explain` works, and the classification
 engine is implemented and tested: both branches of the decision tree, and the joining step that
 turns their pair of answers into one of the five labels. Nine species profiles ship with the tool.
-What does not exist yet is the way in and the way out — reading a variant file, printing a report,
-and the `janook classify` command are the next layers, so classification is currently reachable
-only from Java.
+What does not exist yet is the way in and the way out — reading an evidence file (the file where a
+user records a variant and their decision on each criterion), printing a report, and the
+`janook classify` command are the next layers, so classification is currently reachable only from
+Java.
 
 ## Why build it
 
