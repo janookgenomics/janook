@@ -167,6 +167,14 @@ Step 4 is the one that gets skipped — everything looks finished once `main` is
 release then silently reverts whatever the last one fixed. CI checks it rather than trusting it:
 see [CONTRIBUTING.md](../CONTRIBUTING.md#branches).
 
+Step 4 also has a mechanical wrinkle, learned during the first release. The merge back **must be a
+true merge commit**: the check verifies that every commit on `main` is reachable from `develop`,
+and a squash — the repository's only enabled merge method — creates a new commit and can never
+satisfy that. So the merge back is done from a branch off `develop` that merges `main`, resolving
+the version conflicts directly to the next `-SNAPSHOT` (steps 4 and 5 in one motion), and its pull
+request is merged with a merge commit — enabling that merge method for the occasion and disabling
+it again afterwards, the same deliberate friction as the branch-protection toggle.
+
 A tag whose name disagrees with the artifact built from its commit is a failed release, not a
 labelling detail. The release check fails on that mismatch rather than letting it publish.
 
