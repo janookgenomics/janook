@@ -24,6 +24,49 @@ had ticked. Its first recommendation is that automated label-assignment tools be
 This project is that software. You supply the evidence; it applies the rules the same way every
 time and shows its work.
 
+## A quick look
+
+```
+$ janook classify variant.yaml
+
+PKD1  c.10063C>A  (p.Cys3355Ter)   cat (felis_catus)
+
+Pathogenic criteria
+  PVS1  very strong  MET           Nonsense variant; loss of function is the established mec...
+  PS5   strong       MET           Cosegregates with disease in 12 affected Persians across ...
+Benign criteria
+  BS2   strong       NOT MET       Checked: not observed in healthy adult cats in the colony...
+  not assessed: 20 further criteria
+
+Decision path
+  Branch A (pathogenic):  PATHOGENIC by rule P.i (≥1 strong): PVS1, PS5
+  Branch B (benign):      no rule satisfied
+  Step 2:                 exactly one branch produced a label, and it stands
+
+CLASSIFICATION: PATHOGENIC
+
+AVCG-2024 · janook 9.0.0 · profile felis_catus (Felis_catus_9.0)
+input sha256:57e0182e... · 2026-08-16
+```
+
+The full walkthrough of this case, from evidence file to report, is in
+[examples/pkd1](examples/pkd1/README.md). `janook classify --batch` does the same for a TSV with
+one variant per row, and `--json` and `--report` render the same record for pipelines and for a
+paper's supplementary material.
+
+## Install
+
+Java 25 or later is the only requirement. Download the archive from the
+[latest release](https://github.com/janookgenomics/janook/releases/latest), then:
+
+```
+tar -xzf janook-9.0.0-dist.tar.gz
+janook-9.0.0/bin/janook --version
+```
+
+Put `janook-9.0.0/bin` on your `PATH` to type plain `janook`. A Bioconda package — which installs
+Java for you — is under review; this section will gain a `conda install` line when it lands.
+
 ## Why this project?
 
 I've spent most of my career building software, including several years working around biotech
@@ -45,13 +88,12 @@ like the right tradeoff.
 
 ## Status
 
-Early development. The 23 criteria are encoded, `janook explain` works, and the classification
-engine is implemented and tested: both branches of the decision tree, and the joining step that
-turns their pair of answers into one of the five labels. Nine species profiles ship with the tool.
-What does not exist yet is the way in and the way out — reading an evidence file (the file where a
-user records a variant and their decision on each criterion), printing a report, and the
-`janook classify` command are the next layers, so classification is currently reachable only from
-Java.
+Version 9.0.0 is released and working end to end: all 23 criteria, the full decision process,
+nine species out of the box, evidence-file and spreadsheet input, and four output forms including
+the one-page report. What is still to come: `janook validate`, which will run the guideline's
+published 53-variant feline truth set and reproduce the paper's accuracy figure — it needs
+per-variant data that is not in the paper's supplementary material, and we have asked the
+guideline authors for it.
 
 ## Why build it
 
@@ -106,9 +148,8 @@ not have, it tells you what AVCG calls it instead — ACMG/AMP's `BP7` here is `
 reused a code for a new criterion, the output says so: `janook explain PP1` shows AVCG's `PP1` and
 adds a note that ACMG/AMP's `PP1` is a different criterion, AVCG's `PS5`.
 
-> **There is no installable `janook` yet.** The examples above are written as the command will be
-> once packaging exists. From a clone, `mvn clean package` and then `./scripts/janook explain PS5`,
-> which runs the jar you just built.
+> Working from a clone instead of an install? `mvn clean package` and then
+> `./scripts/janook explain PS5` runs the jar you just built.
 
 If you find a discrepancy, please open an issue. Treat it as a **correctness bug**, not a
 documentation problem: under [docs/VERSIONING.md](docs/VERSIONING.md), changing a criterion's
@@ -127,6 +168,23 @@ leave room for interpretation, Janook tries to make that visible rather than hid
 
 If something in Janook does not match your reading of AVCG, please open an issue. Scientific
 corrections are especially welcome.
+
+## Citing
+
+Two things get cited, for two different reasons:
+
+- **The standard** — the AVCG guidelines paper. Anyone classifying under AVCG cites it,
+  janook or not: Boeykens et al. (2024), *Development and validation of animal variant
+  classification guidelines to objectively evaluate genetic variant pathogenicity in domestic
+  animals*, Frontiers in Veterinary Science 11:1497817,
+  https://doi.org/10.3389/fvets.2024.1497817
+- **The implementation** — janook, at the version you ran. GitHub's "Cite this repository"
+  button uses [CITATION.cff](CITATION.cff).
+
+A methods section typically needs both in one sentence:
+
+> Variants were classified according to AVCG (Boeykens et al., 2024) as implemented in janook
+> v9.0.0.
 
 ## Licence
 

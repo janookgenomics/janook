@@ -1,0 +1,29 @@
+# The worked example: the feline PKD1 stop-gain variant, the same case the docs use throughout.
+# Walkthrough: README.md in this directory.
+variant:
+  species: felis_catus
+  gene: PKD1
+  transcript: ENSFCAT00000012345
+  hgvs_c: c.10063C>A
+  hgvs_p: p.Cys3355Ter
+  consequence: stop_gained
+
+criteria:
+  PVS1:
+    met: true
+    evidence: "Nonsense variant; loss of function is the established mechanism for autosomal
+               dominant polycystic kidney disease in cats."
+    source: "OMIA 000807-9685; PMID 15340017"
+    asserted_by: example
+  PS5:
+    met: true
+    evidence: "Cosegregates with disease in 12 affected Persians across 3 families."
+    source: "PMID 15340017"
+    asserted_by: example
+  BS2:
+    met: false
+    evidence: "Checked: not observed in healthy adult cats in the colony data reviewed."
+  PP3:
+    met: not_assessed
+    evidence: "Nonsense variant - AVCG does not use the computational criteria here; the
+               available tools score near chance for this variant class."

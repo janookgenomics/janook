@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: >-
+  If you use janook, please cite it as below — and cite the AVCG guidelines paper
+  (Boeykens et al. 2024, https://doi.org/10.3389/fvets.2024.1497817) for the standard
+  itself. The two are different things: the paper defines the guidelines, janook is one
+  implementation of them. See the Citing section of the README.
+title: janook
+type: software
+authors:
+  - name: "The Janook Authors"
+version: 9.0.0
+date-released: 2026-08-16
+license: Apache-2.0
+repository-code: "https://github.com/janookgenomics/janook"
+url: "https://github.com/janookgenomics/janook"
+keywords:
+  - variant classification
+  - veterinary genetics
+  - AVCG
