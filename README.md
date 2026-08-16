@@ -24,6 +24,22 @@ had ticked. Its first recommendation is that automated label-assignment tools be
 This project is that software. You supply the evidence; it applies the rules the same way every
 time and shows its work.
 
+## Why this project?
+
+I've spent many years working in software, including several years around biotech and human
+genetics. Along the way, I've benefited from a huge amount of open-source software built and
+shared by researchers, bioinformaticians, and software engineers.
+
+After decades of mostly being a consumer of open source, I wanted to contribute something back,
+even if small.
+
+I started looking for a useful problem where software could help and where an open-source
+implementation didn't already exist. Human genetics already has an impressive ecosystem of mature
+tools. Animal variant classification looked different: AVCG is a relatively new standard, and I
+couldn't find an open-source implementation of it.
+
+Janook started from that gap.
+
 ## Status
 
 Early development. The 23 criteria are encoded, `janook explain` works, and the classification
