@@ -147,6 +147,62 @@ class ClassifyCommandTest {
     }
 
     @Test
+    @DisplayName("--brief prints the classification line and nothing else")
+    void briefArtifact() {
+        assertEquals(0, run("classify", evidenceFile.toString(), "--brief"));
+
+        assertEquals("CLASSIFICATION: PATHOGENIC\n", stdout());
+    }
+
+    @Test
+    @DisplayName("--brief keeps the two uncertain routes apart, like every other rendering")
+    void briefKeepsUncertainRoutesApart() throws IOException {
+        Path conflict = dir.resolve("conflict.yaml");
+        Files.writeString(
+                conflict,
+                """
+                variant:
+                  species: felis_catus
+                  gene: G
+                  transcript: T
+                  hgvs_c: c.1A>G
+                  consequence: missense_variant
+                criteria:
+                  PS1: {met: true}
+                  PS2: {met: true}
+                  BS1: {met: true}
+                  BS2: {met: true}
+                """);
+
+        assertEquals(0, run("classify", conflict.toString(), "--brief"));
+        assertEquals(
+                "CLASSIFICATION: UNCERTAIN SIGNIFICANCE — the evidence contradicts itself\n",
+                stdout());
+    }
+
+    @Test
+    @DisplayName("--brief --json prints a minimal parseable document: the label and the reason")
+    @SuppressWarnings("unchecked")
+    void briefJsonArtifact() {
+        assertEquals(0, run("classify", evidenceFile.toString(), "--brief", "--json"));
+
+        Map<String, Object> document =
+                (Map<String, Object>)
+                        new Yaml(new SafeConstructor(new LoaderOptions())).load(stdout());
+        assertEquals("PATHOGENIC", document.get("label"));
+        assertEquals("ONE_BRANCH_LABELLED", document.get("reason"));
+        assertEquals(2, document.size(), "the label, the reason, and nothing else");
+    }
+
+    @Test
+    @DisplayName("--brief refuses --report, and refuses --batch, which is already brief")
+    void briefRefusesContradictions() {
+        assertEquals(2, run("classify", evidenceFile.toString(), "--brief", "--report"));
+        assertEquals(2, run("classify", "--batch", batchFile.toString(), "--brief"));
+        assertEquals("", stdout());
+    }
+
+    @Test
     @DisplayName("a rejected file leaves standard output empty and exits 1")
     void rejectedFileLeavesStdoutEmpty() throws IOException {
         Path bad = dir.resolve("bad.yaml");

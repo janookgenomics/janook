@@ -33,6 +33,8 @@ public final class Janook {
             classify flags:
               --json               print the JSON document instead of the summary
               --report             print the Markdown report instead of the summary
+              --brief              print only the classification line; with --json, a
+                                   minimal {label, reason} document
               --operator <name>    record who ran the classification
 
             exit codes:
