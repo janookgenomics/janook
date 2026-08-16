@@ -147,7 +147,9 @@ Real use forces specialization.
 
 ## Input
 
-YAML per variant — human-writable, reviewable, diffs cleanly in git.
+**One evidence file per variant.** The evidence file is the single thing a user hands janook: it
+records which variant this is, and what the user decided about each criterion, with their reasons
+and citations. YAML — human-writable, reviewable, diffs cleanly in git.
 
 ```yaml
 variant:
@@ -183,8 +185,8 @@ quietly go wrong.
 
 Batch TSV mode too — the audience lives in spreadsheets.
 
-**The input files are themselves an artifact.** Kept in git, they give a lab a versioned record of
-every classification it ever made, re-runnable years later.
+**The evidence files are themselves an artifact.** Kept in git, they give a lab a versioned record
+of every classification it ever made, re-runnable years later.
 
 ## Output
 

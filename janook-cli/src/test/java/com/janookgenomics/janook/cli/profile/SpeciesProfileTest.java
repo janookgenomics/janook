@@ -63,7 +63,7 @@ class SpeciesProfileTest {
                 "felis__catus", "_felis_catus", "felis_catus_"})
     @DisplayName("a species identifier outside genus_species form is rejected")
     void malformedSpeciesIdentifierIsRejected(String species) {
-        // The identifier is what users type in variant files and what profile files are named
+        // The identifier is what users type in evidence files and what profile files are named
         // after, so its shape is pinned: lowercase ASCII words joined by single underscores.
         IllegalArgumentException thrown =
                 assertThrows(
