@@ -93,4 +93,36 @@ class JanookTest {
         assertEquals(2, run("--version", "extra"));
         assertEquals("", stdout());
     }
+
+    @Test
+    @DisplayName("help is an answer; a bare janook is not — same text, different codes")
+    void helpAndBareJanookDiffer() {
+        assertEquals(0, run("help"));
+        assertTrue(stdout().startsWith("usage: janook"), stdout());
+        assertTrue(stdout().contains("classify <file>"), "every command is listed");
+        assertTrue(stdout().contains("exit codes"), "the contract is documented");
+
+        out.reset();
+        assertEquals(2, run());
+        assertEquals("", stdout());
+        assertTrue(stderr().startsWith("usage: janook"), "the same text, on stderr");
+    }
+
+    @Test
+    @DisplayName("an unexpected failure is janook's own, and says so with its own exit code")
+    void internalFailureIsOwnedLoudly() {
+        var stream = new PrintStream(err, true, StandardCharsets.UTF_8);
+
+        int status =
+                Janook.guard(
+                        () -> {
+                            throw new IllegalStateException("deliberate test failure");
+                        },
+                        stream);
+
+        assertEquals(3, status);
+        assertTrue(stderr().contains("bug in janook, not a problem with your input"), stderr());
+        assertTrue(stderr().contains("Please report it"), stderr());
+        assertTrue(stderr().contains("deliberate test failure"), "the trace makes the report useful");
+    }
 }

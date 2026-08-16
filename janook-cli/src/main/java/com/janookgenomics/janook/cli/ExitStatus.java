@@ -18,5 +18,11 @@ final class ExitStatus {
     /** Did not run: the command line itself was not understood. */
     static final int USAGE_ERROR = 2;
 
+    /**
+     * Failed: a bug in janook, not a fault in the input. Distinct so a script never mistakes our
+     * crash for the user's file — one says "fix your file", the other says "file an issue".
+     */
+    static final int INTERNAL_ERROR = 3;
+
     private ExitStatus() {}
 }
