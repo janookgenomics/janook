@@ -188,7 +188,7 @@ final class ExplainCommand {
      * into "Null variant (nonsense" — which reads like a whole definition and misleads, where an
      * ellipsis is obviously incomplete.
      */
-    private static String preview(String definition) {
+    static String preview(String definition) {
         return definition.length() <= 60 ? definition : definition.substring(0, 57) + "...";
     }
 
