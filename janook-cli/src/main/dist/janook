@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# The janook launcher — the command an installation puts on PATH.
+#
+# It runs the jar that shipped beside it and does nothing else: no building, no jar hunting
+# beyond its own lib directory, and exec so the exit code a script sees is exactly the exit code
+# janook returned (0 answered, 1 input rejected, 2 command not understood, 3 janook's own bug).
+#
+# Exit 127 when java is missing: the shell's own "command not found" convention, chosen so that an
+# environment problem can never be mistaken for one of janook's four codes. Installations through
+# a package manager declare Java as a dependency and never hit this.
+
+set -u
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if ! command -v java >/dev/null 2>&1; then
+  echo "janook: java is not on PATH (Java 25 or later is required)" >&2
+  exit 127
+fi
+
+exec java -jar "$here"/../janook-cli-*.jar "$@"
