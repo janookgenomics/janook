@@ -1,7 +1,10 @@
 package com.janookgenomics.janook.cli.profile;
 
+import com.janookgenomics.janook.core.criteria.Avcg2024;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -33,6 +36,12 @@ import java.util.regex.Pattern;
  * @param missensePredictors the tools valid for missense variants in this species, all of which
  *     must agree for the computational criteria to count
  * @param splicePredictors the tools valid for splice-site variants, under the same rule
+ * @param disabledCriteria criteria switched off under this profile, by code. Evidence asserting a
+ *     switched-off criterion is rejected, never quietly ignored, and a classification made under
+ *     the profile is only comparable to others in light of this list — which is why it is part of
+ *     the profile rather than a runtime option. Every shipped profile leaves it empty; it exists
+ *     for the lab that needs a criterion not to apply locally, in a file where the customisation
+ *     is visible and versionable
  */
 public record SpeciesProfile(
         String species,
@@ -41,7 +50,8 @@ public record SpeciesProfile(
         String annotation,
         int omiaSpecies,
         List<String> missensePredictors,
-        List<String> splicePredictors) {
+        List<String> splicePredictors,
+        List<String> disabledCriteria) {
 
     /**
      * Lowercase ASCII words joined by underscores, at least two — a Latin binomial like
@@ -68,6 +78,27 @@ public record SpeciesProfile(
         }
         missensePredictors = requireNamed(missensePredictors, "missensePredictors");
         splicePredictors = requireNamed(splicePredictors, "splicePredictors");
+        disabledCriteria = requireRealCriteria(disabledCriteria);
+    }
+
+    /** A profile that switches nothing off — the state of every shipped profile. */
+    public SpeciesProfile(
+            String species,
+            String displayName,
+            String assembly,
+            String annotation,
+            int omiaSpecies,
+            List<String> missensePredictors,
+            List<String> splicePredictors) {
+        this(
+                species,
+                displayName,
+                assembly,
+                annotation,
+                omiaSpecies,
+                missensePredictors,
+                splicePredictors,
+                List.of());
     }
 
     private static void requireText(String value, String field) {
@@ -85,5 +116,30 @@ public record SpeciesProfile(
             }
         }
         return List.copyOf(tools);
+    }
+
+    /**
+     * Every switched-off code must name a criterion the edition actually has, exactly as its code
+     * is written. A profile disabling a criterion that does not exist is a mistake, and treating
+     * it as a no-op would hide a typo that was meant to change classifications.
+     */
+    private static List<String> requireRealCriteria(List<String> codes) {
+        Objects.requireNonNull(codes, "disabledCriteria");
+        Set<String> seen = new HashSet<>();
+        for (String code : codes) {
+            Objects.requireNonNull(code, "disabledCriteria entry");
+            if (Avcg2024.byCode(code).isEmpty()) {
+                throw new IllegalArgumentException(
+                        "disabledCriteria names a criterion that does not exist in "
+                                + Avcg2024.edition().identifier()
+                                + ": "
+                                + code);
+            }
+            if (!seen.add(code)) {
+                throw new IllegalArgumentException(
+                        "disabledCriteria names " + code + " twice");
+            }
+        }
+        return List.copyOf(codes);
     }
 }

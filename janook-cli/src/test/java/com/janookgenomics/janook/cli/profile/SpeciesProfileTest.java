@@ -158,6 +158,69 @@ class SpeciesProfileTest {
     }
 
     @Test
+    @DisplayName("a profile can switch off criteria that exist, and carries the list")
+    void switchedOffCriteriaAreCarried() {
+        SpeciesProfile profile =
+                new SpeciesProfile(
+                        "felis_catus",
+                        "cat",
+                        "x",
+                        "x",
+                        1,
+                        List.of(),
+                        List.of(),
+                        List.of("BS1", "PP4"));
+
+        assertEquals(List.of("BS1", "PP4"), profile.disabledCriteria());
+    }
+
+    @Test
+    @DisplayName("a profile built without the switch-off list switches nothing off")
+    void withoutTheListNothingIsSwitchedOff() {
+        assertTrue(cat().disabledCriteria().isEmpty());
+    }
+
+    @Test
+    @DisplayName("switching off a criterion the edition does not have is rejected, naming it")
+    void unknownSwitchedOffCriterionIsRejected() {
+        // Treating an unknown code as a no-op would hide a typo that was meant to change
+        // classifications — BS4 is exactly the code an ACMG-trained author would reach for.
+        IllegalArgumentException thrown =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () ->
+                                new SpeciesProfile(
+                                        "felis_catus",
+                                        "cat",
+                                        "x",
+                                        "x",
+                                        1,
+                                        List.of(),
+                                        List.of(),
+                                        List.of("BS4")));
+
+        assertTrue(thrown.getMessage().contains("BS4"), thrown.getMessage());
+        assertTrue(thrown.getMessage().contains("AVCG-2024"), thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("switching off the same criterion twice is rejected")
+    void duplicateSwitchedOffCriterionIsRejected() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        new SpeciesProfile(
+                                "felis_catus",
+                                "cat",
+                                "x",
+                                "x",
+                                1,
+                                List.of(),
+                                List.of(),
+                                List.of("BS1", "BS1")));
+    }
+
+    @Test
     @DisplayName("the predictor lists cannot be modified, by a caller or through the original list")
     void predictorListsAreImmutable() {
         List<String> given = new ArrayList<>(List.of("mutpred2"));
