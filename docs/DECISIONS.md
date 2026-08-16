@@ -61,5 +61,7 @@ A jar plus a `lib/` directory, rather than one shaded artifact: bundling everyth
 file is a distribution decision, and distribution has its own epic. This keeps the build honest
 without pre-empting that decision.
 
-Today `lib/` holds `janook-core` and nothing else — core's no-third-party rule is what keeps it
-that way. If it ever stops being small, something has gone wrong upstream of here.
+Today `lib/` holds `janook-core` and the YAML parser, and core's no-third-party rule keeps core's
+own contribution to it at nothing. Every jar in `lib/` ships to every user, so a new entry needs a
+reason the way a new core dependency does — if the directory ever stops being small, something has
+gone wrong upstream of here.
