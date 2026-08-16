@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.janookgenomics</groupId>
+    <artifactId>janook-parent</artifactId>
+    <version>9.0.0</version>
+  </parent>
+
+  <artifactId>janook-core</artifactId>
+  <packaging>jar</packaging>
+
+  <name>janook-core</name>
+  <description>
+    The AVCG criteria, their weights and the decision tree. Pure Java: no framework, no I/O, no
+    species knowledge. Evidence in, classification out.
+  </description>
+
+  <!--
+    NO COMPILE-SCOPE THIRD-PARTY DEPENDENCIES. This is a hard rule, and it is load-bearing: it is
+    what makes janook-core embeddable in someone else's pipeline without dragging in a persistence
+    layer, a web server or a CLI framework.
+
+    It is no longer only a comment. The enforcer executions declared below fail the build at the
+    validate phase if a dependency appears here, and the tripwire projects under src/it prove those
+    rules actually fire.
+
+    Test-scope dependencies are deliberately exempt: the boundary is about what an embedder is
+    forced to accept, and nobody inherits your test classpath.
+  -->
+
+  <dependencies>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!--
+        Declared with no configuration: the rules and their messages live in the parent, so that
+        the tripwire projects inherit exactly what runs here.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+
+      <!--
+        The tripwires. Each project under src/it violates exactly one boundary rule and is asserted
+        to fail. Without them, a rule that is silently misconfigured passes every build, and nobody
+        notices until the day the rule was needed.
+
+        The dependency rules only. The no-I/O and no-species rules carry their own tripwires as
+        ordinary tests, which is cheaper — a whole Maven sub-build is the price of proving that
+        something in the *build* fires, and only the enforcer rules live there.
+
+        Each project's verify.groovy also asserts the build log explains *which* rule broke and
+        *why* it exists — a rule that fails with "banned dependency found" teaches nobody anything.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <configuration>
+          <projectsDirectory>src/it</projectsDirectory>
+          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+          <localRepositoryPath>${project.build.directory}/it-repo</localRepositoryPath>
+          <showErrors>true</showErrors>
+          <streamLogs>false</streamLogs>
+        </configuration>
+        <dependencies>
+          <!-- Required for the verify.groovy log assertions. -->
+          <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>5.0.6</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>boundary-tripwires</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>install</goal>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

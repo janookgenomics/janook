@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.janookgenomics</groupId>
+  <artifactId>janook-parent</artifactId>
+  <version>9.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>janook</name>
+  <description>
+    An open-source Java implementation of the Animal Variant Classification Guidelines (AVCG).
+  </description>
+
+  <!--
+    Inherited by every module, so each published artifact declares the same licence rather than
+    relying on a file at the root of a repository the artifact does not travel with.
+
+    This covers the Janook source only. Third-party material redistributed in the repository is
+    listed in NOTICE and is not covered — see NOTICE for what and why.
+  -->
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <!--
+    Module order here is documentation, not build order: Maven derives the reactor order from the
+    inter-module dependencies below. Listed core-first because that is the dependency direction.
+  -->
+  <modules>
+    <module>janook-core</module>
+    <module>janook-cli</module>
+    <module>janook-store</module>
+    <module>janook-web</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!--
+      Makes builds reproducible: the jar and assembly plugins stamp every archive entry with this
+      fixed instant instead of the wall clock, so two builds of the same commit produce
+      byte-identical artifacts. That is what makes the checksum in a release, and in the Bioconda
+      recipe that pins it, meaningful. The real build time is not lost - the build commit in
+      janook-version.properties is the provenance that matters.
+    -->
+    <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
+
+    <!--
+      Java 25 is the source, target and release level, not merely the JDK that builds the project.
+      See docs/PLAN.md § Toolchain — this is a settled decision, not a build detail.
+    -->
+    <maven.compiler.release>25</maven.compiler.release>
+
+    <archunit.version>1.4.1</archunit.version>
+    <junit.version>5.12.2</junit.version>
+    <snakeyaml.version>2.6</snakeyaml.version>
+
+    <git-commit-id-maven-plugin.version>9.0.2</git-commit-id-maven-plugin.version>
+    <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
+    <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+    <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+    <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
+    <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+    <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+    <maven-invoker-plugin.version>3.10.1</maven-invoker-plugin.version>
+    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+    <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+    <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!--
+        Sibling module versions are managed here so modules never repeat ${project.version}.
+        Third-party dependencies are added per module. janook-core must acquire none of them
+        at compile scope; the reasoning is in janook-core/pom.xml.
+      -->
+      <dependency>
+        <groupId>com.janookgenomics</groupId>
+        <artifactId>janook-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.janookgenomics</groupId>
+        <artifactId>janook-store</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.tngtech.archunit</groupId>
+        <artifactId>archunit-junit5</artifactId>
+        <version>${archunit.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <!--
+        YAML parsing for the app layer: species profiles now, variant input later. Chosen over the
+        Jackson YAML module because it is a single jar with no transitive dependencies, and every
+        runtime dependency here ships in lib/ beside the jar. Never for janook-core, whose
+        no-third-party rule is enforced by the build.
+      -->
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <!--
+      LICENSE and NOTICE travel inside every jar, not just at the root of the repository. A jar
+      pulled from an artifact repository arrives without the repository around it, and Apache-2.0
+      section 4 requires the NOTICE to accompany the distribution.
+
+      The first entry restates the default source directory: declaring <resources> replaces the
+      default rather than adding to it, and omitting it would silently stop packaging every module's
+      own resources.
+    -->
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <!--
+          A plain relative path, not ${project.parent.basedir}. Resource directories are resolved
+          against the module's own basedir before that property is available, so the property form
+          survives into the effective POM uninterpolated and silently copies nothing. ".." is the
+          repository root for every module here, all of which sit one level down.
+        -->
+        <directory>..</directory>
+        <targetPath>META-INF</targetPath>
+        <includes>
+          <include>LICENSE</include>
+          <include>NOTICE</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <!--
+      Every plugin that binds to the default lifecycle is pinned. An unpinned plugin resolves to
+      whatever the local Maven happens to prefer, which makes a clean-clone build unreproducible
+      across machines and across time.
+    -->
+    <pluginManagement>
+      <plugins>
+        <!--
+          Reads the build commit out of git. Bound early by the module that uses it, because the
+          properties it publishes have to exist before resource filtering runs.
+        -->
+        <plugin>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
+          <version>${git-commit-id-maven-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${maven-clean-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${maven-resources-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven-dependency-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${maven-install-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-invoker-plugin</artifactId>
+          <version>${maven-invoker-plugin.version}</version>
+        </plugin>
+        <!--
+          THE CORE BOUNDARY RULES.
+
+          These live in the parent rather than in janook-core so that the tripwire projects under
+          janook-core/src/it can inherit and trigger the *real* rules. A tripwire that tests a
+          copy of a rule proves only that the copy works.
+
+          Any module that wants these rules declares the plugin with no configuration of its own.
+          Today that is janook-core alone, and by design.
+
+          Bound to validate: these must fail before anything is compiled or downloaded, so a
+          violation costs a second rather than a full build.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>core-no-third-party-at-compile-scope</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <bannedDependencies>
+                    <message>
+ARCHITECTURAL RULE: janook-core must have no third-party dependencies at compile or runtime scope.
+
+WHY: janook-core is the classification engine, and it is meant to be embedded in someone else's
+pipeline — a Nextflow step, another JVM tool, a lab's in-house code. Every compile-scope dependency
+it acquires is imposed on all of them, and becomes a version conflict they have to resolve. A core
+that pulls in a YAML parser, a persistence layer or a web framework is a core nobody can embed.
+
+The pressure comes from the criterion definitions, which must be read from somewhere. Both
+acceptable answers keep this rule intact: parse outside core and hand it a built object, or generate
+core's criterion table at build time. Adding the parser here is the one answer that is not available.
+
+Test-scope dependencies are unaffected and always were.
+                    </message>
+                    <searchTransitive>true</searchTransitive>
+                    <excludes>
+                      <exclude>*:*:*:*:compile</exclude>
+                      <exclude>*:*:*:*:runtime</exclude>
+                    </excludes>
+                  </bannedDependencies>
+                </rules>
+                <fail>true</fail>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>core-no-dependency-on-outer-modules</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <bannedDependencies>
+                    <message>
+ARCHITECTURAL RULE: janook-core must not depend on janook-cli, janook-store or janook-web. The
+arrow points one way only.
+
+WHY: the outer modules exist to serve the core, never the reverse. A core that reaches back into
+the CLI to read a file, or into the store to save a result, has stopped being a pure function from
+evidence to classification — and it drags the whole application in behind it for anyone trying to
+embed it.
+
+If the core appears to need something from an outer module, the dependency is inverted: define the
+interface in core and let the outer module implement it.
+
+This rule applies at every scope, including test. A test that needs the store is an integration
+test and belongs in the module that owns the integration.
+                    </message>
+                    <searchTransitive>true</searchTransitive>
+                    <excludes>
+                      <exclude>com.janookgenomics:janook-cli</exclude>
+                      <exclude>com.janookgenomics:janook-store</exclude>
+                      <exclude>com.janookgenomics:janook-web</exclude>
+                    </excludes>
+                  </bannedDependencies>
+                </rules>
+                <fail>true</fail>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>

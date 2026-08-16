@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#
+# Run janook from a clone, without typing java -jar and a version number.
+#
+# THIS IS A DEVELOPMENT CONVENIENCE, NOT THE LAUNCHER WE SHIP. The installed command comes from
+# packaging — a Bioconda recipe that declares openjdk and puts a wrapper on PATH — and none of that
+# exists yet. This script exists so the examples in README.md and CONTRIBUTING.md can be run today
+# by someone who has just cloned the repository, rather than being aspirational text.
+#
+# It deliberately does not build. A wrapper that quietly runs Maven turns "this command is slow"
+# into a mystery, and hides the fact that you are running a jar built from whatever the tree looked
+# like the last time you asked for one.
+#
+# Exit 2 if it cannot run at all, so that a missing jar never reads like the tool answering.
+
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(dirname "$HERE")"
+TARGET="$ROOT/janook-cli/target"
+
+fatal() { printf 'janook: %s\n' "$1" >&2; exit 2; }
+
+command -v java >/dev/null 2>&1 || fatal "java is not on PATH (Java 25 or later is required)"
+
+# Newest first, and never a sources or javadoc jar — those are also janook-cli-*.jar.
+JAR="$(ls -t "$TARGET"/janook-cli-*.jar 2>/dev/null \
+  | grep -v -e '-sources\.jar$' -e '-javadoc\.jar$' \
+  | head -1)"
+
+[ -n "$JAR" ] || fatal "no jar in janook-cli/target — run 'mvn clean package' first"
+
+# The jar's manifest names its dependencies relative to itself, so the lib directory beside it has
+# to exist. Without this the failure is a NoClassDefFoundError from deep inside the command.
+[ -d "$TARGET/lib" ] || fatal "janook-cli/target/lib is missing — run 'mvn clean package' first"
+
+exec java -jar "$JAR" "$@"

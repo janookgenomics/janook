@@ -1,0 +1,10 @@
+# A stub: real species facts, and no predictors because none have been validated for this
+# species — the paper's benchmark covered the cat only.
+species: ovis_aries
+display_name: sheep
+assembly: ARS-UI_Ramb_v3.0
+annotation: Ensembl 116
+omia_species: 9940
+predictors:
+  missense: []
+  splice: []

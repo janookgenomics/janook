@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.janookgenomics</groupId>
+    <artifactId>janook-parent</artifactId>
+    <version>9.0.0</version>
+  </parent>
+
+  <artifactId>janook-store</artifactId>
+  <packaging>jar</packaging>
+
+  <name>janook-store</name>
+  <description>
+    Persistence. SQLite by default — one file, zero setup, owned by the lab. Every classification
+    saved, searchable and re-runnable.
+  </description>
+
+  <!--
+    Declared now and empty until phase 2. Declaring it costs one POM and makes the dependency
+    rules total rather than partial; adding modules later means revisiting the enforcement rules
+    each time, which is how a boundary quietly stops being enforced.
+  -->
+
+  <dependencies>
+    <dependency>
+      <groupId>com.janookgenomics</groupId>
+      <artifactId>janook-core</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>

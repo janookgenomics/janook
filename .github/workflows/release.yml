@@ -1,0 +1,87 @@
+# A pushed release tag builds its own release, so a release has no manual steps to forget.
+#
+# Every step here except the last runs exactly the commands a contributor runs locally — the same
+# rule ci.yml lives by. The last step, creating the GitHub release and uploading the artifact, is
+# the one inherently-remote exception; CONTRIBUTING names it. A tag that fails any check produces
+# no release, because the steps before publication fail the job first — including the
+# release-version check's strictest rules, which only apply on refs/tags/v*.
+#
+# Notes are not generated: the workflow refuses to publish without docs/release-notes/<tag>.md,
+# because release notes that say what a release contains and omits are a human's honesty, not a
+# machine's. The workflow appends the artifact checksum to them.
+#
+# Same interpolation rule as the other workflows: values reach the shell through the environment,
+# never through ${{ }} inside a run block.
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history: the public-safety check reads every commit message, and the build stamp
+          # needs the repository behind the tag.
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: temurin
+          cache: maven
+
+      - name: Public-safety check
+        run: ./scripts/check-public-safe.sh
+
+      - name: Build
+        run: mvn clean verify
+
+      - name: Release-version check
+        # On refs/tags/v* this enforces the strictest rules there are: the artifact's version
+        # matches the tag exactly, the commit is known, and the tree was clean.
+        env:
+          REF: ${{ github.ref }}
+        run: ./scripts/check-release-version.sh "$REF"
+
+      - name: Dist check
+        run: ./scripts/check-dist.sh
+
+      - name: Release notes must exist
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [ ! -f "docs/release-notes/${TAG}.md" ]; then
+            echo "no release without notes: docs/release-notes/${TAG}.md does not exist." >&2
+            echo "Write what this release contains and omits, commit it before the tag." >&2
+            exit 1
+          fi
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ARTIFACT="$(find janook-cli/target -maxdepth 1 -name 'janook-*-dist.tar.gz' | head -1)"
+          shasum -a 256 "$ARTIFACT" | sed 's|janook-cli/target/||' > "$ARTIFACT.sha256"
+
+          {
+            cat "docs/release-notes/${TAG}.md"
+            printf '\n## Artifact\n\n'
+            printf '`%s`\n\n' "$(basename "$ARTIFACT")"
+            printf 'sha256: `%s`\n' "$(cut -d' ' -f1 "$ARTIFACT.sha256")"
+          } > /tmp/notes.md
+
+          gh release create "$TAG" "$ARTIFACT" "$ARTIFACT.sha256" \
+            --title "janook ${TAG#v}" \
+            --notes-file /tmp/notes.md \
+            --verify-tag

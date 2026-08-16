@@ -1,0 +1,92 @@
+# The two gitflow rules that decay first, mechanised.
+#
+# Both are invisible until a release goes wrong, which is the worst possible moment to discover
+# them. Neither can be enforced by the Maven build, because neither is a property of the code — they
+# are properties of how the branches were used.
+#
+# Note on interpolation: branch names reach these scripts through the environment, never through
+# ${{ }} inside a `run:` block. A branch name is attacker-controlled text on a public repository,
+# and pasting it straight into a shell is a command-injection hole.
+
+name: Branch policy
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  # RULE 1 — work must not reach main except through a release or a hotfix.
+  #
+  # Without this, a feature branch merged straight to main skips the release process entirely, and
+  # main quietly stops being "what was released".
+  release-or-hotfix-only:
+    name: only release/ or hotfix/ may target main
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      HEAD_REF: ${{ github.head_ref }}
+    steps:
+      - name: Check the source branch
+        run: |
+          case "$HEAD_REF" in
+            release/*|hotfix/*)
+              printf 'OK: %s may target main.\n' "$HEAD_REF"
+              ;;
+            *)
+              printf 'BRANCHING RULE: only release/ and hotfix/ branches may target main.\n' >&2
+              printf '\n' >&2
+              printf 'This pull request is from: %s\n' "$HEAD_REF" >&2
+              printf '\n' >&2
+              printf 'WHY: main is meant to record what was released, nothing else. A feature\n' >&2
+              printf 'merged straight into main skips the release process, so the tag, the\n' >&2
+              printf 'changelog and the version no longer describe what is actually on main.\n' >&2
+              printf '\n' >&2
+              printf 'Retarget this pull request at develop. If it genuinely is a release or an\n' >&2
+              printf 'urgent production fix, branch it as release/x.y.z or hotfix/x.y.z.\n' >&2
+              exit 1
+              ;;
+          esac
+
+  # RULE 2 — a release must be merged back into develop.
+  #
+  # After a release or hotfix lands on main, develop has to receive it too. Forget, and the fix is
+  # silently reverted by the next release, having appeared to work for weeks.
+  #
+  # This runs on pushes to develop as well as to main, on purpose. During a release, the push to
+  # main happens before the merge back into develop, so the run on main fails — that failure is
+  # the reminder. The run on the develop push that merges main back is what goes green and shows
+  # the reminder was acted on. Without the develop trigger, the red run on main would just sit
+  # there after the merge back, looking like an unresolved problem.
+  merge-back-complete:
+    name: main is fully contained in develop
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check every commit on main is also on develop
+        run: |
+          git fetch --quiet origin main develop
+          missing=$(git rev-list origin/develop..origin/main)
+          if [ -z "$missing" ]; then
+            printf 'OK: every commit on main is reachable from develop.\n'
+            exit 0
+          fi
+          printf 'BRANCHING RULE: main contains commits that develop does not.\n' >&2
+          printf '\n' >&2
+          printf 'Missing from develop:\n' >&2
+          git log --oneline origin/develop..origin/main >&2
+          printf '\n' >&2
+          printf 'WHY: a release or hotfix that lands on main must be merged back into develop.\n' >&2
+          printf 'Skip it and the next release silently reverts the fix — it will have appeared\n' >&2
+          printf 'to work for however long it takes anyone to notice.\n' >&2
+          printf '\n' >&2
+          printf 'Merge main into develop.\n' >&2
+          exit 1

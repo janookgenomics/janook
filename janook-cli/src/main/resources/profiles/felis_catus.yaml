@@ -1,0 +1,10 @@
+# The complete profile. Assembly and annotation are the ones the published truth set was built
+# against; the predictor combinations are the ones the paper validated (Table 2).
+species: felis_catus
+display_name: cat
+assembly: Felis_catus_9.0
+annotation: Ensembl 111
+omia_species: 9685
+predictors:
+  missense: [mutpred2, list-s2]
+  splice: [sspnn, spliceator]

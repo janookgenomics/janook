@@ -1,0 +1,78 @@
+name: Bug report
+description: A classification that is wrong, or anything else that misbehaves
+labels: [bug]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Janook is determinism-critical: the same evidence must always produce the same
+        classification. That makes **"it gave the wrong answer" unactionable on its own** — the
+        answer depends entirely on what it was given.
+
+        The four fields below are what turn a report into something reproducible. Please fill them
+        in even if the cause seems obvious.
+
+  - type: input
+    id: species
+    attributes:
+      label: Species
+      description: Which species was being classified. The engine is species-agnostic, so its profile matters.
+      placeholder: e.g. cat, dog, horse
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Janook version
+      description: Output of `janook --version`. Criterion weights and the decision tree can change between major versions.
+      placeholder: e.g. 9.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: input
+    attributes:
+      label: Input file
+      description: |
+        The complete input, pasted or attached. Please remove anything you cannot share — but a
+        redacted input that still reproduces the problem is far more useful than a description of one.
+      render: yaml
+    validations:
+      required: true
+
+  - type: input
+    id: observed
+    attributes:
+      label: Classification you got
+      placeholder: e.g. VUS
+    validations:
+      required: true
+
+  - type: input
+    id: expected
+    attributes:
+      label: Classification you expected
+      placeholder: e.g. Likely pathogenic
+    validations:
+      required: true
+
+  - type: textarea
+    id: reasoning
+    attributes:
+      label: Why you expected that
+      description: |
+        Which criteria you believe should have fired, and any published source. This is often where
+        the real answer is — a disagreement about the evidence is a different bug from a decision
+        tree that computed the wrong label, and separating the two is most of the diagnosis.
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Java version (`java -version`) and operating system.
+    validations:
+      required: false

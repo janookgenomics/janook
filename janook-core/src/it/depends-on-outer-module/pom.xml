@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.janookgenomics</groupId>
+    <artifactId>janook-parent</artifactId>
+    <version>9.0.0</version>
+  </parent>
+
+  <artifactId>tripwire-depends-on-outer-module</artifactId>
+
+  <!--
+    Inherits the real enforcer rules from janook-parent. Nothing about the rule is restated here;
+    only the violation is. A tripwire that carries its own copy of the rule proves only that the
+    copy works.
+  -->
+  <dependencies>
+    <dependency>
+      <groupId>com.janookgenomics</groupId>
+      <artifactId>janook-cli</artifactId>
+      <version>${project.version}</version>
+      <!--
+        Test scope, deliberately. At compile scope the "no third-party at compile scope" rule fires
+        first and this tripwire would prove that rule twice over while never reaching the one it
+        exists for. Test scope isolates the arrow rule, and is the case worth guarding anyway: a
+        core test that reaches for the store is an integration test in the wrong module.
+      -->
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

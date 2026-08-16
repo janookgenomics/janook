@@ -1,0 +1,90 @@
+# The build is enforced by running it somewhere the author cannot skip.
+#
+# The commands below are the commands a contributor runs locally, verbatim. That is deliberate,
+# and it is the rule most worth protecting here: it is what makes a green run meaningful, because
+# it guarantees the same commands pass on a clone. If a step is worth running here it is worth
+# documenting in CONTRIBUTING.md, and if it is not worth documenting there it does not belong
+# here.
+
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    # Tags too. The release-version check has rules for refs/tags/v* — the strictest ones it
+    # has — and they can only run if pushing a tag triggers CI.
+    tags: ['v*']
+  pull_request:
+
+# Cancel superseded runs on the same branch; the newest push is the only one whose answer matters.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The public-safety check reads every commit message via `git log --all`. A shallow
+          # checkout would hand it one commit, and it would pass by seeing almost nothing — the
+          # check would still be running, but it would be blind.
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: temurin
+          # Cached for speed. The weekly uncached run in ci-uncached.yml exists because a cache
+          # can hide a dependency that resolves only because it is already there.
+          cache: maven
+
+      - name: Public-safety check
+        run: ./scripts/check-public-safe.sh
+
+      - name: Public-safety self-test
+        # The check itself has a test suite asserting each of its rules fails when violated. A
+        # scan that is quietly misconfigured passes every run until the day it was needed.
+        run: ./scripts/check-public-safe.test.sh
+
+      - name: Build
+        run: mvn clean verify
+
+      - name: Release-version check
+        # After the build, because it reads the version out of the jar rather than the pom: the
+        # pom says what the build was asked to produce, the jar says what it produced.
+        #
+        # The ref reaches the script through the environment, never through ${{ }} inside the
+        # shell — same rule as branch-policy.yml, and for the same reason.
+        #
+        # head_ref on a pull request, where github.ref is a merge ref no rule applies to. Without
+        # it every pull request would take the skip path and the check would look like it was
+        # running while asserting nothing.
+        env:
+          REF: ${{ github.head_ref || github.ref }}
+        run: ./scripts/check-release-version.sh "$REF"
+
+      - name: Release-version self-test
+        run: ./scripts/check-release-version.test.sh
+
+      - name: Dist check
+        # The release archive, unpacked and actually run through its shipped launcher. Passing
+        # tests do not prove the built artifact works; this does.
+        run: ./scripts/check-dist.sh
+
+      - name: Reproducibility check
+        # Two builds of the same commit must produce byte-identical artifacts, or the checksum a
+        # release publishes identifies nothing.
+        run: |
+          first=$(shasum -a 256 janook-cli/target/janook-*-dist.tar.gz | cut -d' ' -f1)
+          mvn -q clean package
+          second=$(shasum -a 256 janook-cli/target/janook-*-dist.tar.gz | cut -d' ' -f1)
+          [ "$first" = "$second" ] || { echo "artifact is not reproducible: $first vs $second"; exit 1; }
+          echo "reproducible: $first"
