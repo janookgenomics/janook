@@ -177,6 +177,15 @@ class SpeciesProfileLoaderTest {
     }
 
     @Test
+    @DisplayName("a duplicated field is rejected, not resolved by keeping the last")
+    void duplicateFieldIsRejected() {
+        // The YAML library's default is last-one-wins — a silent overwrite that would hide a file
+        // saying two different things about one field.
+        IllegalArgumentException thrown = rejected(CAT + "assembly: SomethingElse_1.0\n");
+        assertTrue(thrown.getMessage().contains("assembly"), thrown.getMessage());
+    }
+
+    @Test
     @DisplayName("an empty file is rejected as not being a profile")
     void emptyFileIsRejected() {
         IllegalArgumentException thrown = rejected("");

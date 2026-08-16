@@ -175,8 +175,8 @@ criteria:
 
   PP3:
     met: not_assessed
-    note: "Nonsense variant — AVCG does not support PP3/BP4 for nonsense or
-           frameshift; the available tools score near chance."
+    evidence: "Nonsense variant — AVCG does not support PP3/BP4 for nonsense or
+               frameshift; the available tools score near chance."
 ```
 
 **Three states per criterion, never two:** `met` / `not_met` / `not_assessed`. "We checked and it
