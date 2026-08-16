@@ -184,6 +184,37 @@ class SpeciesProfileLoaderTest {
     }
 
     @Test
+    @DisplayName("a file may switch off criteria, and its absence means nothing is switched off")
+    void disabledCriteriaAreOptional() {
+        assertTrue(load(CAT).disabledCriteria().isEmpty(), "absence must mean none");
+
+        SpeciesProfile customised = load(CAT + "disabled_criteria: [BS1]\n");
+        assertEquals(List.of("BS1"), customised.disabledCriteria());
+    }
+
+    @Test
+    @DisplayName("a file switching off a criterion the edition does not have is rejected at load")
+    void unknownDisabledCriterionIsRejectedAtLoad() {
+        IllegalArgumentException thrown = rejected(CAT + "disabled_criteria: [BP7]\n");
+
+        assertTrue(thrown.getMessage().contains("BP7"), thrown.getMessage());
+        assertTrue(thrown.getMessage().contains("test-profile"), thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("disabled_criteria must be a list of text codes")
+    void disabledCriteriaMustBeAListOfText() {
+        assertTrue(
+                rejected(CAT + "disabled_criteria: BS1\n")
+                        .getMessage()
+                        .contains("must be a list"));
+        assertTrue(
+                rejected(CAT + "disabled_criteria: [1]\n")
+                        .getMessage()
+                        .contains("non-text"));
+    }
+
+    @Test
     @DisplayName("the profile's own rules still apply to file content")
     void profileValidationStillApplies() {
         // The loader adds where the fault was read; the profile type still decides what a valid

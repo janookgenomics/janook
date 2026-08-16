@@ -140,6 +140,19 @@ class ShippedProfilesTest {
     }
 
     @Test
+    @DisplayName("no shipped profile switches off any criterion")
+    void noShippedProfileSwitchesAnythingOff() {
+        // Switching a criterion off is for a lab's deliberate local customisation. A shipped
+        // profile that arrived with one would silently change classifications for everyone using
+        // that species out of the box.
+        for (String species : ShippedProfiles.known()) {
+            assertTrue(
+                    ShippedProfiles.load(species).disabledCriteria().isEmpty(),
+                    species + " ships with a criterion switched off");
+        }
+    }
+
+    @Test
     @DisplayName("the display names read as the plain English the report will print")
     void displayNamesArePlainEnglish() {
         assertEquals("cat", ShippedProfiles.load("felis_catus").displayName());

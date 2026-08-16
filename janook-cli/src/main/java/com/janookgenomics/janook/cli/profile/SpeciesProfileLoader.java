@@ -36,7 +36,7 @@ public final class SpeciesProfileLoader {
 
     private static final Set<String> ROOT_FIELDS =
             Set.of("species", "display_name", "assembly", "annotation", "omia_species",
-                    "predictors");
+                    "predictors", "disabled_criteria");
 
     private static final Set<String> PREDICTOR_FIELDS = Set.of("missense", "splice");
 
@@ -85,7 +85,8 @@ public final class SpeciesProfileLoader {
                     text(fields, "annotation", source),
                     wholeNumber(fields, "omia_species", source),
                     tools(predictors, "missense", source),
-                    tools(predictors, "splice", source));
+                    tools(predictors, "splice", source),
+                    disabledCriteria(fields, source));
         } catch (IllegalArgumentException e) {
             // The profile's own validation names the field; the loader adds where it was read.
             throw fault(source, e.getMessage());
@@ -135,6 +136,29 @@ public final class SpeciesProfileLoader {
         @SuppressWarnings("unchecked")
         List<String> names = (List<String>) list;
         return names;
+    }
+
+    /**
+     * The one optional root field. Absence unambiguously means "nothing switched off", unlike the
+     * predictor lists, where an absent list could also mean the author forgot — so no explicit
+     * empty list is demanded here.
+     */
+    private static List<String> disabledCriteria(Map<String, Object> fields, String source) {
+        Object value = fields.get("disabled_criteria");
+        if (value == null) {
+            return List.of();
+        }
+        if (!(value instanceof List<?> list)) {
+            throw fault(source, "disabled_criteria must be a list, got: " + value);
+        }
+        for (Object code : list) {
+            if (!(code instanceof String)) {
+                throw fault(source, "disabled_criteria contains a non-text entry: " + code);
+            }
+        }
+        @SuppressWarnings("unchecked")
+        List<String> codes = (List<String>) list;
+        return codes;
     }
 
     private static Map<String, Object> mapOf(Object value, String source, String what) {
