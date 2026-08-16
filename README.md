@@ -26,8 +26,12 @@ time and shows its work.
 
 ## Status
 
-Early development. The 23 criteria are encoded and `janook explain` works. Classification itself —
-the decision tree that turns evidence into a label — does not exist yet.
+Early development. The 23 criteria are encoded, `janook explain` works, and the classification
+engine is implemented and tested: both branches of the decision tree, and the joining step that
+turns their pair of answers into one of the five labels. Nine species profiles ship with the tool.
+What does not exist yet is the way in and the way out — reading a variant file, printing a report,
+and the `janook classify` command are the next layers, so classification is currently reachable
+only from Java.
 
 ## Why build it
 
@@ -89,6 +93,18 @@ adds a note that ACMG/AMP's `PP1` is a different criterion, AVCG's `PS5`.
 If you find a discrepancy, please open an issue. Treat it as a **correctness bug**, not a
 documentation problem: under [docs/VERSIONING.md](docs/VERSIONING.md), changing a criterion's
 weight is a major version, because it can change a classification someone has already published.
+
+## Scientific review
+
+Janook implements AVCG; it is not an authority on AVCG.
+
+Janook was built from a software engineering perspective, and we welcome review from veterinary
+geneticists, researchers, and bioinformaticians. Every criterion points back to the relevant table
+and page in the AVCG paper. Where the guidelines leave room for interpretation, Janook tries to
+make that visible rather than hide it in the code.
+
+If something in Janook does not match your reading of AVCG, please open an issue. Scientific
+corrections are especially welcome.
 
 ## Licence
 
