@@ -1,0 +1,10 @@
+# A stub: real species facts, and no predictors because none have been validated for this
+# species — the paper's benchmark covered the cat only.
+species: gallus_gallus
+display_name: chicken
+assembly: bGalGal1.mat.broiler.GRCg7b
+annotation: Ensembl 116
+omia_species: 9031
+predictors:
+  missense: []
+  splice: []

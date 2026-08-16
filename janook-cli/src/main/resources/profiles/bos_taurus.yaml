@@ -1,0 +1,10 @@
+# A stub: real species facts, and no predictors because none have been validated for this
+# species — the paper's benchmark covered the cat only.
+species: bos_taurus
+display_name: cattle
+assembly: ARS-UCD2.0
+annotation: Ensembl 116
+omia_species: 9913
+predictors:
+  missense: []
+  splice: []

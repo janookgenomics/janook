@@ -1,0 +1,10 @@
+# A stub: real species facts, and no predictors because none have been validated for this
+# species — the paper's benchmark covered the cat only.
+species: equus_caballus
+display_name: horse
+assembly: EquCab3.0
+annotation: Ensembl 116
+omia_species: 9796
+predictors:
+  missense: []
+  splice: []

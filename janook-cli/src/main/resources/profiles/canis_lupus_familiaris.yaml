@@ -1,0 +1,10 @@
+# A stub: real species facts, and no predictors because none have been validated for this
+# species — the paper's benchmark covered the cat only.
+species: canis_lupus_familiaris
+display_name: dog
+assembly: ROS_Cfam_1.0
+annotation: Ensembl 116
+omia_species: 9615
+predictors:
+  missense: []
+  splice: []
