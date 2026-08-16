@@ -53,6 +53,7 @@
 
     <archunit.version>1.4.1</archunit.version>
     <junit.version>5.12.2</junit.version>
+    <snakeyaml.version>2.6</snakeyaml.version>
 
     <git-commit-id-maven-plugin.version>9.0.2</git-commit-id-maven-plugin.version>
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -96,6 +97,17 @@
         <artifactId>archunit-junit5</artifactId>
         <version>${archunit.version}</version>
         <scope>test</scope>
+      </dependency>
+      <!--
+        YAML parsing for the app layer: species profiles now, variant input later. Chosen over the
+        Jackson YAML module because it is a single jar with no transitive dependencies, and every
+        runtime dependency here ships in lib/ beside the jar. Never for janook-core, whose
+        no-third-party rule is enforced by the build.
+      -->
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
