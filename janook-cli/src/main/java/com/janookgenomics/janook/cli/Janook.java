@@ -6,15 +6,16 @@ import java.io.PrintStream;
 /**
  * The {@code janook} command.
  *
- * <p>Two questions so far, both about trust rather than classification: which version of what am I
- * running, and what does this tool believe a criterion says. Classification itself needs the
- * decision tree, which does not exist yet.
+ * <p>Three commands so far: which version of what am I running, what does this tool believe a
+ * criterion says, and a template to start an evidence file from. Classification exists in the
+ * engine but is not reachable from here yet — that command arrives with the output layer.
  */
 public final class Janook {
 
     private static final String USAGE =
             """
             usage: janook --version
+                   janook init
                    janook explain <criterion>
                    janook explain --list""";
 
@@ -30,6 +31,9 @@ public final class Janook {
         if (args.length == 1 && "--version".equals(args[0])) {
             printVersion(out);
             return ExitStatus.OK;
+        }
+        if (args.length == 1 && "init".equals(args[0])) {
+            return InitCommand.run(out);
         }
         if (args.length == 2 && "explain".equals(args[0])) {
             return "--list".equals(args[1])
