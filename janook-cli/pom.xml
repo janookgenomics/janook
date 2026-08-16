@@ -205,6 +205,9 @@
                 <descriptor>src/assembly/dist.xml</descriptor>
               </descriptors>
               <tarLongFileMode>posix</tarLongFileMode>
+              <!-- The artifact a user downloads is janook, not the name of an internal module. -->
+              <finalName>janook-${project.version}</finalName>
+              <appendAssemblyId>true</appendAssemblyId>
             </configuration>
           </execution>
         </executions>

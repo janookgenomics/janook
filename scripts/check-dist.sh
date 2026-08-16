@@ -16,7 +16,7 @@ fatal() { printf 'dist check could not run: %s\n' "$1" >&2; exit 2; }
 
 DIST="${1:-}"
 if [ -z "$DIST" ]; then
-  DIST="$(find janook-cli/target -maxdepth 1 -name 'janook-cli-*-dist.tar.gz' 2>/dev/null | head -1)"
+  DIST="$(find janook-cli/target -maxdepth 1 -name 'janook-*-dist.tar.gz' 2>/dev/null | head -1)"
   [ -n "$DIST" ] || fatal "no dist archive under janook-cli/target — run 'mvn clean package' first"
 fi
 [ -f "$DIST" ] || fatal "archive does not exist: $DIST"

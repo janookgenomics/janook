@@ -78,6 +78,12 @@ running in CI it is documented here, and if it is not documented here it does no
 matters because it is what makes a green CI run meaningful: it guarantees the same commands pass on
 your clone.
 
+There is exactly one exception, and it is inherent: when a release tag is pushed, the release
+workflow runs all of the commands above and then performs the one step that cannot be run locally —
+creating the GitHub release and uploading the artifact. It refuses to publish unless
+`docs/release-notes/<tag>.md` exists, because notes saying what a release contains and omits are
+written by a person, not generated.
+
 ## The architectural rules, and why the build enforces them
 
 Three constraints on `janook-core` are enforced by the build rather than by review. If you trip one,
