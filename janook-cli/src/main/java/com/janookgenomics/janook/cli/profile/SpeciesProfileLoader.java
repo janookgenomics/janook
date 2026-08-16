@@ -64,7 +64,11 @@ public final class SpeciesProfileLoader {
 
         Object root;
         try {
-            root = new Yaml(new SafeConstructor(new LoaderOptions())).load(content);
+            // Duplicate keys are refused rather than last-one-wins — a silent overwrite would
+            // hide that a file says two different things about one field.
+            LoaderOptions options = new LoaderOptions();
+            options.setAllowDuplicateKeys(false);
+            root = new Yaml(new SafeConstructor(options)).load(content);
         } catch (MarkedYAMLException e) {
             throw fault(source, at(e.getProblemMark()) + e.getProblem());
         } catch (YAMLException e) {
