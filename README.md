@@ -56,16 +56,23 @@ paper's supplementary material.
 
 ## Install
 
-Java 25 or later is the only requirement. Download the archive from the
-[latest release](https://github.com/janookgenomics/janook/releases/latest), then:
+With conda, which installs Java for you:
+
+```
+conda install -c conda-forge -c bioconda janook
+janook --version
+```
+
+Or download the archive from the
+[latest release](https://github.com/janookgenomics/janook/releases/latest), which needs Java 25 or
+later already installed:
 
 ```
 tar -xzf janook-9.0.0-dist.tar.gz
 janook-9.0.0/bin/janook --version
 ```
 
-Put `janook-9.0.0/bin` on your `PATH` to type plain `janook`. A Bioconda package — which installs
-Java for you — is under review; this section will gain a `conda install` line when it lands.
+Put `janook-9.0.0/bin` on your `PATH` to type plain `janook`.
 
 ## Why this project?
 
